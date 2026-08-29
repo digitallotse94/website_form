@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kostenlosen Website-Erstentwurf anfragen</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    /* Very minimal styling for readability only */
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #111; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .form-section { margin-bottom: 2rem; }
+    .field-group { margin-bottom: 1rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select { width: 100%; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    .hint { font-size: 0.85rem; color: #666; margin-top: 0.2rem; }
+    .required-star { color: #c00; }
+    .optional-tag { font-weight: normal; color: #666; font-size: 0.85rem; }
+    .error-msg { color: #c00; font-size: 0.85rem; margin-top: 0.2rem; display: none; }
+    .field-error input, .field-error textarea, .field-error select { border-color: #c00; }
+    fieldset { border: none; padding: 0; margin: 0; }
+    legend { font-weight: 600; margin-bottom: 0.5rem; }
+    .checkbox-group label, .radio-group label { font-weight: normal; display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; margin-bottom: 0.4rem; }
+    .checkbox-group input, .radio-group input { margin-top: 0.25rem; }
+    details { margin-top: 1.5rem; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; }
+    details summary { cursor: pointer; font-weight: 600; }
+    details[open] summary { margin-bottom: 1rem; }
+    .optional-intro { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    button[type="submit"] { padding: 0.75rem 1.5rem; font-size: 1rem; font-family: inherit; cursor: pointer; background: #111; color: #fff; border: none; border-radius: 4px; }
+    button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+    .success-message { padding: 1.5rem; background: #f0fdf4; border: 1px solid #86efac; border-radius: 4px; }
+    .success-message h2 { margin-bottom: 0.5rem; color: #166534; }
+    .error-banner { padding: 1rem; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 4px; margin-bottom: 1rem; color: #991b1b; display: none; }
+    .hp-field { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+  <h1>Kostenlosen Website-Erstentwurf anfragen</h1>
+  <p>Füllen Sie die folgenden Angaben aus, um einen kostenlosen Erstentwurf für Ihre Website zu erhalten.</p>
+
+  <form id="demo-request-form" action="#" novalidate>
+    <div class="hp-field" aria-hidden="true">
+      <label for="website_url_confirm">Bitte leer lassen</label>
+      <input type="text" name="website_url_confirm" id="website_url_confirm" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div id="form-error-banner" class="error-banner" role="alert"></div>
+
+    <div class="field-group">
+      <label for="company_name">Unternehmensname <span class="required-star" aria-hidden="true">*</span></label>
+      <input type="text" id="company_name" name="company_name" required autocomplete="organization">
+      <span id="company_name-error" class="error-msg" role="alert">Bitte geben Sie den Unternehmensnamen ein.</span>
+    </div>
+
+    <div class="field-group">
+      <label for="contact_name">Ansprechpartner <span class="required-star" aria-hidden="true">*</span></label>
+      <input type="text" id="contact_name" name="contact_name" required autocomplete="name">
+      <span id="contact_name-error" class="error-msg" role="alert">Bitte geben Sie einen Ansprechpartner ein.</span>
+    </div>
+
+    <div class="field-group">
+      <label for="email">E-Mail-Adresse <span class="required-star" aria-hidden="true">*</span></label>
+      <input type="email" id="email" name="email" required autocomplete="email">
+      <span id="email-error" class="error-msg" role="alert">Bitte geben Sie eine gültige E-Mail-Adresse ein.</span>
+    </div>
+
+    <div class="field-group">
+      <fieldset>
+        <legend>Hat Ihr Unternehmen bereits eine Website? <span class="required-star" aria-hidden="true">*</span></legend>
+        <div class="radio-group">
+          <label for="has_website_yes">
+            <input type="radio" name="has_existing_website" id="has_website_yes" value="yes">
+            Ja
+          </label>
+          <label for="has_website_no">
+            <input type="radio" name="has_existing_website" id="has_website_no" value="no">
+            Nein
+          </label>
+        </div>
+      </fieldset>
+      <span id="has_existing_website-error" class="error-msg" role="alert">Bitte wählen Sie eine Option.</span>
+    </div>
+
+    <div class="field-group" id="existing-website-group" style="display:none;">
+      <label for="existing_website">Adresse Ihrer aktuellen Website <span class="required-star" aria-hidden="true">*</span></label>
+      <input type="text" id="existing_website" name="existing_website" placeholder="www.beispiel.de" autocomplete="url">
+      <div class="hint">Sie können die Adresse auch ohne https:// eingeben.</div>
+      <span id="existing_website-error" class="error-msg" role="alert">Bitte geben Sie die Adresse Ihrer Website ein.</span>
+    </div>
+
+    <div class="field-group checkbox-group">
+      <label for="privacy_acknowledged">
+        <input type="checkbox" id="privacy_acknowledged" name="privacy_acknowledged" required>
+        <span>Ich habe die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> zur Verarbeitung meiner Angaben gelesen.</span>
+      </label>
+      <span id="privacy_acknowledged-error" class="error-msg" role="alert">Bitte bestätigen Sie die Kenntnisnahme der Datenschutzerklärung.</span>
+    </div>
+
+    <details id="optional-section">
+      <summary>Weitere Angaben hinzufügen (optional)</summary>
+      <p class="optional-intro">Sie können uns zusätzliche Informationen geben, damit wir den ersten Entwurf noch besser auf Ihr Unternehmen abstimmen können. Alle folgenden Angaben sind freiwillig und können übersprungen werden.</p>
+
+      <div class="field-group">
+        <label for="phone">Telefonnummer <span class="optional-tag">(optional)</span></label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel">
+      </div>
+
+      <div class="field-group">
+        <label for="industry">Branche <span class="optional-tag">(optional)</span></label>
+        <input type="text" id="industry" name="industry" placeholder="z. B. Tischlerei, Friseursalon, Gebäudereinigung">
+        <div class="hint">Wenn Sie nichts angeben, versuchen wir die Branche anhand Ihrer Unternehmensinformationen zu ermitteln.</div>
+      </div>
+
+      <div class="field-group">
+        <label for="location">Standort <span class="optional-tag">(optional)</span></label>
+        <input type="text" id="location" name="location" placeholder="z. B. Bremen" autocomplete="address-level2">
+      </div>
+
+      <div class="field-group">
+        <fieldset>
+          <legend>Was soll Ihre neue Website hauptsächlich erreichen? <span class="optional-tag">(optional)</span></legend>
+          <div class="radio-group">
+            <label for="goal_professioneller_auftritt">
+              <input type="radio" name="primary_goal" id="goal_professioneller_auftritt" value="professioneller_auftritt">
+              Professioneller Unternehmensauftritt
+            </label>
+            <label for="goal_mehr_anfragen">
+              <input type="radio" name="primary_goal" id="goal_mehr_anfragen" value="mehr_anfragen">
+              Mehr Kundenanfragen
+            </label>
+            <label for="goal_mehr_anrufe">
+              <input type="radio" name="primary_goal" id="goal_mehr_anrufe" value="mehr_anrufe">
+              Mehr Anrufe
+            </label>
+            <label for="goal_terminbuchungen">
+              <input type="radio" name="primary_goal" id="goal_terminbuchungen" value="terminbuchungen">
+              Terminbuchungen
+            </label>
+            <label for="goal_leistungen_darstellen">
+              <input type="radio" name="primary_goal" id="goal_leistungen_darstellen" value="leistungen_darstellen">
+              Leistungen besser darstellen
+            </label>
+            <label for="goal_mitarbeitende_gewinnen">
+              <input type="radio" name="primary_goal" id="goal_mitarbeitende_gewinnen" value="mitarbeitende_gewinnen">
+              Mitarbeitende gewinnen
+            </label>
+            <label for="goal_sonstiges">
+              <input type="radio" name="primary_goal" id="goal_sonstiges" value="sonstiges">
+              Sonstiges
+            </label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="field-group" id="primary-goal-other-group" style="display:none;">
+        <label for="primary_goal_other">Sonstiges Ziel <span class="optional-tag">(optional)</span></label>
+        <input type="text" id="primary_goal_other" name="primary_goal_other">
+      </div>
+
+      <div class="field-group">
+        <label for="services">Welche Leistungen oder Produkte sollen besonders hervorgehoben werden? <span class="optional-tag">(optional)</span></label>
+        <textarea id="services" name="services"></textarea>
+        <div class="hint">Optional – wenn Sie nichts eintragen, versuchen wir die Informationen selbst zu ermitteln.</div>
+      </div>
+
+      <div class="field-group">
+        <label for="differentiators">Was zeichnet Ihr Unternehmen besonders aus? <span class="optional-tag">(optional)</span></label>
+        <textarea id="differentiators" name="differentiators" placeholder="z. B. Familienbetrieb, besondere Spezialisierung, langjährige Erfahrung oder regionaler Service"></textarea>
+      </div>
+
+      <div class="field-group">
+        <fieldset>
+          <legend>Wie sollen Interessierte Sie vorzugsweise kontaktieren können? <span class="optional-tag">(optional)</span></legend>
+          <div class="checkbox-group">
+            <label for="cta_telefon">
+              <input type="checkbox" name="preferred_cta" id="cta_telefon" value="telefon">
+              Telefon
+            </label>
+            <label for="cta_email">
+              <input type="checkbox" name="preferred_cta" id="cta_email" value="email">
+              E-Mail
+            </label>
+            <label for="cta_kontaktformular">
+              <input type="checkbox" name="preferred_cta" id="cta_kontaktformular" value="kontaktformular">
+              Kontaktformular
+            </label>
+            <label for="cta_angebot_anfragen">
+              <input type="checkbox" name="preferred_cta" id="cta_angebot_anfragen" value="angebot_anfragen">
+              Angebot anfragen
+            </label>
+            <label for="cta_termin_buchen">
+              <input type="checkbox" name="preferred_cta" id="cta_termin_buchen" value="termin_buchen">
+              Termin buchen
+            </label>
+          </div>
+        </fieldset>
+      </div>
+    </details>
+
+    <div class="field-group" style="margin-top: 1.5rem;">
+      <button type="submit" id="submit-btn">Kostenlosen Erstentwurf anfragen</button>
+    </div>
+  </form>
+
+  <div id="success-message" class="success-message" style="display:none">
+    <h2>Vielen Dank für Ihre Anfrage.</h2>
+    <p>Ihre Angaben wurden erfolgreich übermittelt. Wir prüfen die Informationen und bereiten Ihren Website-Erstentwurf vor.</p>
+  </div>
+
+  <script src="form.js"></script>
+</body>
+</html>
