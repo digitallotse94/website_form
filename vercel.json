@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/process-website.ts": {
-      "maxDuration": 60
-    }
-  }
-}
