@@ -61,66 +61,84 @@ export default async function handler(req: any, res: any) {
     websiteSource = websiteResult.source;
   }
 
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
 
-  let interaction: any;
+const ai = new GoogleGenAI({ apiKey: geminiKey });
 
-  try {
-    interaction = await ai.interactions.create({
-      model: GEMINI_MODEL,
-      input: buildPrompt(input, websiteText, websiteSource),
-      generation_config: {
-        thinking_level: "low"
+const controller = new AbortController();
+const geminiTimeout = setTimeout(() => {
+  controller.abort();
+}, 50000);
+
+let response: any;
+
+try {
+  response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: buildPrompt(input, websiteText, websiteSource),
+    config: {
+      thinkingConfig: {
+        thinkingLevel: "low"
       },
-      response_format: {
-        type: "text",
-        mime_type: "application/json",
-        schema: OUTPUT_SCHEMA
+      responseMimeType: "application/json",
+      responseSchema: OUTPUT_SCHEMA,
+      maxOutputTokens: 8192,
+      temperature: 0.3,
+      abortSignal: controller.signal,
+      httpOptions: {
+        timeout: 50000
       }
-    });
-  } catch (error) {
-    console.error("Gemini request failed", error);
+    }
+  });
+} catch (error) {
+  console.error("Gemini request failed", error);
 
-    return res.status(502).json({
-      ok: false,
-      error: "gemini_request_failed",
-      details: error instanceof Error ? error.message : String(error)
-    });
-  }
+  return res.status(502).json({
+    ok: false,
+    error:
+      controller.signal.aborted
+        ? "gemini_timeout"
+        : "gemini_request_failed",
+    details: error instanceof Error ? error.message : String(error)
+  });
+} finally {
+  clearTimeout(geminiTimeout);
+}
 
-  const outputText =
-    typeof interaction?.output_text === "string"
-      ? interaction.output_text.trim()
-      : "";
+const outputText =
+  typeof response?.text === "string"
+    ? response.text.trim()
+    : "";
 
-  if (!outputText) {
-    return res.status(502).json({
-      ok: false,
-      error: "gemini_empty_output",
-      status: interaction?.status ?? null
-    });
-  }
+if (!outputText) {
+  return res.status(502).json({
+    ok: false,
+    error: "gemini_empty_output"
+  });
+}
 
-  let generated: {
-    blueprint: JsonRecord;
-    website_copy: JsonRecord;
-  };
+let generated: {
+  blueprint: JsonRecord;
+  website_copy: JsonRecord;
+};
 
-  try {
-    generated = JSON.parse(outputText);
-  } catch {
-    return res.status(502).json({
-      ok: false,
-      error: "gemini_invalid_structured_output"
-    });
-  }
+try {
+  generated = JSON.parse(outputText);
+} catch (error) {
+  console.error("Gemini JSON parsing failed", error);
 
-  if (!generated.blueprint || !generated.website_copy) {
-    return res.status(502).json({
-      ok: false,
-      error: "gemini_missing_output_fields"
-    });
-  }
+  return res.status(502).json({
+    ok: false,
+    error: "gemini_invalid_structured_output"
+  });
+}
+
+if (!generated.blueprint || !generated.website_copy) {
+  return res.status(502).json({
+    ok: false,
+    error: "gemini_missing_output_fields"
+  });
+}
+
 
   const vibePrompt = buildV0Prompt(
     input.company_name,
@@ -138,7 +156,7 @@ export default async function handler(req: any, res: any) {
       model: GEMINI_MODEL,
       website_source: websiteSource,
       website_text_characters: websiteText.length,
-      usage: interaction?.usage ?? null
+      usage: response?.usageMetadata ?? null
     }
   });
 }
