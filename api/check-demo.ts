@@ -59,27 +59,30 @@ export default async function handler(req: any, res: any) {
     const needsAction = status === "requires_action";
     const needsContinuation = status === "incomplete";
 
-    return res.status(200).json({
-      ok: true,
+return res.status(200).json({
+  ok: true,
 
-      interaction_id: interaction.id,
-      environment_id: interaction.environment_id ?? null,
+  interaction_id: interaction.id,
+  environment_id: interaction.environment_id ?? null,
 
-      status,
+  status,
 
-      is_finished: isFinished,
-      needs_action: needsAction,
+  is_finished: isFinished,
+  needs_action: needsAction,
+  needs_continuation: needsContinuation,
 
-      output_text:
-        status === "completed"
-          ? interaction.output_text ?? null
-          : null,
+  output_text:
+    status === "completed"
+      ? interaction.output_text ?? null
+      : null,
 
-      error:
-        status === "failed"
-          ? interaction.error ?? null
-          : null,
-    });
+  error:
+    status === "failed"
+      ? interaction.error ?? null
+      : null,
+
+  usage: interaction.usage ?? null,
+});
   } catch (error) {
     console.error("Antigravity status check failed", error);
 
