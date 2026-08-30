@@ -53,9 +53,11 @@ export default async function handler(req: any, res: any) {
     const isFinished =
       status === "completed" ||
       status === "failed" ||
-      status === "cancelled";
+      status === "cancelled" ||
+      status === "incomplete";
 
     const needsAction = status === "requires_action";
+    const needsContinuation = status === "incomplete";
 
     return res.status(200).json({
       ok: true,
