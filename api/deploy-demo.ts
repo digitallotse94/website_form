@@ -62,6 +62,20 @@ function shouldIncludeFile(fullPath: string) {
   return true;
 }
 
+function buildEnvironmentFileUrl(
+  environmentId: string,
+  filePath: string
+) {
+  const encodedPath = filePath
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+
+  return `${GOOGLE_API_BASE}/environments/${encodeURIComponent(
+    environmentId
+  )}/files/${encodedPath}`;
+}
+
 async function listEnvironmentFiles(
   environmentId: string,
   geminiApiKey: string
@@ -71,12 +85,12 @@ async function listEnvironmentFiles(
 
   do {
     const url = new URL(
-      `${GOOGLE_API_BASE}/environments/${encodeURIComponent(
-        environmentId
-      )}/files`
+      buildEnvironmentFileUrl(
+        environmentId,
+        "workspace/site"
+      )
     );
 
-    url.searchParams.set("path", "workspace/site");
     url.searchParams.set("recursive", "true");
     url.searchParams.set("page_size", "1000");
 
@@ -91,8 +105,10 @@ async function listEnvironmentFiles(
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+
       throw new Error(
-        `environment_file_list_failed_${response.status}`
+        `environment_file_list_failed_${response.status}_${errorText}`
       );
     }
 
@@ -117,12 +133,12 @@ async function downloadEnvironmentFile(
   geminiApiKey: string
 ) {
   const url = new URL(
-    `${GOOGLE_API_BASE}/environments/${encodeURIComponent(
-      environmentId
-    )}/files`
+    buildEnvironmentFileUrl(
+      environmentId,
+      filePath
+    )
   );
 
-  url.searchParams.set("path", filePath);
   url.searchParams.set("alt", "media");
 
   const response = await fetch(url, {
@@ -132,12 +148,16 @@ async function downloadEnvironmentFile(
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+
     throw new Error(
-      `environment_file_download_failed_${response.status}_${filePath}`
+      `environment_file_download_failed_${response.status}_${filePath}_${errorText}`
     );
   }
 
-  return Buffer.from(await response.arrayBuffer());
+  return Buffer.from(
+    await response.arrayBuffer()
+  );
 }
 
 async function uploadFileToVercel(
