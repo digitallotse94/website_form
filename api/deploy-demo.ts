@@ -1,36 +1,31 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+// DEPLOY_DEMO_ARCHIVE_V3_2026_09_01
 import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
 
 export const config = { maxDuration: 300 };
 
 const GOOGLE_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 const VERCEL_API_BASE = "https://api.vercel.com";
+const ANTIGRAVITY_AGENT = "antigravity-preview-05-2026";
+const EXPORT_PATH = "workspace/site-export.tar.gz";
 const MAX_FILES = 400;
-const MAX_TOTAL_BYTES = 40 * 1024 * 1024;
+const MAX_SOURCE_BYTES = 40 * 1024 * 1024;
+const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const UPLOAD_CONCURRENCY = 4;
 
-type EnvironmentFile = {
-  created?: string;
-  mime_type?: string;
-  modified?: string;
-  name?: string;
-  path?: string;
-  size_bytes?: string;
-  type?: "file" | "directory" | string;
-};
+interface InteractionResponse {
+  id?: string;
+  status?: string;
+  environment_id?: string;
+  output_text?: string | null;
+  error?: unknown;
+}
 
-type EnvironmentFilesResponse = {
-  files?: EnvironmentFile[];
-  next_page_token?: string;
-};
-
-type DeployableFile = {
-  sourcePath: string;
+interface DeployableFile {
   deployPath: string;
-  size: number;
-  content?: Buffer;
-  sha?: string;
-};
+  content: Buffer;
+  sha: string;
+}
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -39,7 +34,7 @@ function requireEnv(name: string): string {
 }
 
 function normalizePath(value: string): string {
-  return value.replace(/\\/g, "/").replace(/^\/+/, "");
+  return value.replace(/\\/g, "/").replace(/^\.\//, "").replace(/^\/+/, "");
 }
 
 function encodePathSegments(value: string): string {
@@ -50,74 +45,86 @@ function encodePathSegments(value: string): string {
     .join("/");
 }
 
-function buildEnvironmentFileUrl(
-  environmentId: string,
-  filePath: string,
-  query?: URLSearchParams,
-): string {
-  const encodedEnvironmentId = encodeURIComponent(environmentId);
-  const encodedPath = encodePathSegments(filePath);
-  const base = `${GOOGLE_API_BASE}/environments/${encodedEnvironmentId}/files/${encodedPath}`;
-  const suffix = query && query.toString() ? `?${query.toString()}` : "";
-  return `${base}${suffix}`;
-}
-
-function shouldExcludeDeployPath(filePath: string): boolean {
-  const normalized = normalizePath(filePath);
-  const parts = normalized.split("/");
-  const excludedDirectories = new Set([
-    "node_modules", ".next", ".git", ".vercel", ".cache", ".turbo", "coverage", "dist",
-  ]);
-  if (parts.some((part) => excludedDirectories.has(part))) return true;
-  const fileName = parts[parts.length - 1] || "";
-  return (
-    fileName === ".DS_Store" ||
-    fileName === ".npmrc" ||
-    fileName.endsWith(".log") ||
-    fileName.startsWith(".env")
-  );
-}
-
 async function readErrorResponse(response: Response): Promise<string> {
   const text = await response.text();
-  return text.slice(0, 4000);
+  return text.slice(0, 5000);
 }
 
-async function getEnvironment(environmentId: string, apiKey: string): Promise<any> {
-  const response = await fetch(
-    `${GOOGLE_API_BASE}/environments/${encodeURIComponent(environmentId)}`,
-    { headers: { "x-goog-api-key": apiKey } },
-  );
+function googleHeaders(apiKey: string, json = false): Record<string, string> {
+  const headers: Record<string, string> = {
+    "x-goog-api-key": apiKey,
+    "Api-Revision": "2026-05-20",
+  };
+  if (json) headers["Content-Type"] = "application/json";
+  return headers;
+}
+
+async function createExportInteraction(
+  previousInteractionId: string,
+  environmentId: string,
+  apiKey: string,
+): Promise<InteractionResponse> {
+  const prompt = `Create a compact deployment archive for the already finished website.\n\nRun this exact operation in the existing environment:\n1. Verify /workspace/site/package.json exists. If not, stop and report an error.\n2. Remove any previous /workspace/site-export.tar.gz.\n3. Create /workspace/site-export.tar.gz from the CONTENTS of /workspace/site, excluding generated/reinstallable or secret files: node_modules, .next, .git, .vercel, .cache, .turbo, coverage, dist, .env*, .npmrc, .DS_Store, and *.log.\n4. Do NOT modify source files. Do NOT rebuild. Do NOT install packages. Do NOT deploy.\n5. Verify the archive exists and is non-empty, then report its byte size.\n\nUse tar/gzip. The archive must unpack directly to package.json, app/src/etc. rather than containing a top-level workspace/site directory.`;
+
+  const response = await fetch(`${GOOGLE_API_BASE}/interactions`, {
+    method: "POST",
+    headers: googleHeaders(apiKey, true),
+    body: JSON.stringify({
+      agent: ANTIGRAVITY_AGENT,
+      input: prompt,
+      previous_interaction_id: previousInteractionId,
+      environment: environmentId,
+      background: true,
+      agent_config: {
+        type: "antigravity",
+        max_total_tokens: 12000,
+      },
+    }),
+  });
+
   if (!response.ok) {
     const details = await readErrorResponse(response);
-    throw new Error(`environment_get_failed_${response.status}_${details}`);
+    throw new Error(`export_interaction_create_failed_${response.status}_${details}`);
   }
-  return response.json();
+
+  return (await response.json()) as InteractionResponse;
 }
 
-async function listEnvironmentFiles(
-  environmentId: string,
-  directoryPath: string,
+async function getInteraction(id: string, apiKey: string): Promise<InteractionResponse> {
+  const response = await fetch(`${GOOGLE_API_BASE}/interactions/${encodeURIComponent(id)}`, {
+    headers: googleHeaders(apiKey),
+  });
+  if (!response.ok) {
+    const details = await readErrorResponse(response);
+    throw new Error(`export_interaction_get_failed_${response.status}_${details}`);
+  }
+  return (await response.json()) as InteractionResponse;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForInteraction(
+  interaction: InteractionResponse,
   apiKey: string,
-): Promise<EnvironmentFile[]> {
-  const allFiles: EnvironmentFile[] = [];
-  let pageToken = "";
-  do {
-    const params = new URLSearchParams();
-    params.set("recursive", "true");
-    params.set("page_size", "1000");
-    if (pageToken) params.set("page_token", pageToken);
-    const url = buildEnvironmentFileUrl(environmentId, directoryPath, params);
-    const response = await fetch(url, { headers: { "x-goog-api-key": apiKey } });
-    if (!response.ok) {
-      const details = await readErrorResponse(response);
-      throw new Error(`environment_files_list_failed_${response.status}_${details}`);
-    }
-    const body = (await response.json()) as EnvironmentFilesResponse;
-    if (Array.isArray(body.files)) allFiles.push(...body.files);
-    pageToken = body.next_page_token || "";
-  } while (pageToken);
-  return allFiles;
+): Promise<InteractionResponse> {
+  if (!interaction.id) throw new Error("export_interaction_missing_id");
+  let current = interaction;
+  const deadline = Date.now() + 150_000;
+
+  while (current.status === "in_progress" && Date.now() < deadline) {
+    await sleep(3000);
+    current = await getInteraction(interaction.id, apiKey);
+  }
+
+  if (current.status === "in_progress") {
+    throw new Error("export_interaction_timeout");
+  }
+  if (current.status !== "completed") {
+    throw new Error(`export_interaction_not_completed_${current.status || "unknown"}_${JSON.stringify(current.error || null)}`);
+  }
+  return current;
 }
 
 async function downloadEnvironmentFile(
@@ -125,80 +132,166 @@ async function downloadEnvironmentFile(
   filePath: string,
   apiKey: string,
 ): Promise<Buffer> {
-  const params = new URLSearchParams();
-  params.set("alt", "media");
-  const url = buildEnvironmentFileUrl(environmentId, filePath, params);
-  const response = await fetch(url, { headers: { "x-goog-api-key": apiKey } });
-  if (!response.ok) {
-    const details = await readErrorResponse(response);
-    throw new Error(`environment_file_download_failed_${response.status}_${filePath}_${details}`);
+  const encodedPath = encodePathSegments(filePath);
+  const url = `${GOOGLE_API_BASE}/environments/${encodeURIComponent(environmentId)}/files/${encodedPath}?alt=media`;
+
+  let lastError = "";
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const response = await fetch(url, {
+      headers: googleHeaders(apiKey),
+      redirect: "follow",
+    });
+
+    if (response.ok) {
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (buffer.length === 0) throw new Error("export_archive_empty");
+      if (buffer.length > MAX_ARCHIVE_BYTES) {
+        throw new Error(`export_archive_too_large_${buffer.length}`);
+      }
+      return buffer;
+    }
+
+    lastError = await readErrorResponse(response);
+    if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 4) {
+      throw new Error(`export_archive_download_failed_${response.status}_${lastError}`);
+    }
+    await sleep(attempt * 1500);
   }
-  return Buffer.from(await response.arrayBuffer());
+
+  throw new Error(`export_archive_download_failed_${lastError}`);
 }
 
-function selectDeployableFiles(listedFiles: EnvironmentFile[]): DeployableFile[] {
-  const sitePrefix = "workspace/site/";
-  const selected = listedFiles
-    .filter((entry) => entry.type === "file")
-    .map((entry) => ({
-      sourcePath: normalizePath(entry.path || ""),
-      size: Number(entry.size_bytes || 0),
-    }))
-    .filter((entry) => entry.sourcePath.startsWith(sitePrefix))
-    .map((entry) => ({
-      sourcePath: entry.sourcePath,
-      deployPath: entry.sourcePath.slice(sitePrefix.length),
-      size: entry.size,
-    }))
-    .filter((entry) => Boolean(entry.deployPath))
-    .filter((entry) => !shouldExcludeDeployPath(entry.deployPath));
+function readTarString(buffer: Buffer, start: number, length: number): string {
+  return buffer
+    .subarray(start, start + length)
+    .toString("utf8")
+    .replace(/\0.*$/s, "")
+    .trim();
+}
 
-  if (selected.length === 0) throw new Error("no_deployable_files_found");
-  if (selected.length > MAX_FILES) throw new Error(`too_many_deployable_files_${selected.length}`);
+function readTarOctal(buffer: Buffer, start: number, length: number): number {
+  const raw = readTarString(buffer, start, length).replace(/\s/g, "");
+  if (!raw) return 0;
+  const parsed = parseInt(raw, 8);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-  const totalBytes = selected.reduce((sum, file) => sum + Math.max(0, file.size), 0);
-  if (totalBytes > MAX_TOTAL_BYTES) throw new Error(`source_files_too_large_${totalBytes}`);
-  if (!selected.some((file) => file.deployPath === "package.json")) {
-    throw new Error("package_json_not_found");
+function parsePaxPath(data: Buffer): string | null {
+  const text = data.toString("utf8");
+  for (const line of text.split("\n")) {
+    const match = line.match(/^\d+\s+path=(.*)$/);
+    if (match) return match[1];
   }
-  return selected;
+  return null;
+}
+
+function shouldExcludeDeployPath(filePath: string): boolean {
+  const normalized = normalizePath(filePath);
+  const parts = normalized.split("/");
+  const excludedDirectories = new Set([
+    "node_modules",
+    ".next",
+    ".git",
+    ".vercel",
+    ".cache",
+    ".turbo",
+    "coverage",
+    "dist",
+  ]);
+  if (parts.some((part) => excludedDirectories.has(part))) return true;
+  const fileName = parts[parts.length - 1] || "";
+  return (
+    fileName === ".DS_Store" ||
+    fileName === ".npmrc" ||
+    fileName.startsWith(".env") ||
+    fileName.endsWith(".log")
+  );
+}
+
+function parseTarGz(archive: Buffer): DeployableFile[] {
+  let tar: Buffer;
+  try {
+    tar = gunzipSync(archive);
+  } catch (error) {
+    throw new Error(`export_archive_gunzip_failed_${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  const files: DeployableFile[] = [];
+  let offset = 0;
+  let pendingLongName: string | null = null;
+  let pendingPaxPath: string | null = null;
+
+  while (offset + 512 <= tar.length) {
+    const header = tar.subarray(offset, offset + 512);
+    if (header.every((byte) => byte === 0)) break;
+
+    const name = readTarString(header, 0, 100);
+    const size = readTarOctal(header, 124, 12);
+    const typeFlag = String.fromCharCode(header[156] || 48);
+    const prefix = readTarString(header, 345, 155);
+    const headerPath = prefix ? `${prefix}/${name}` : name;
+    const dataStart = offset + 512;
+    const dataEnd = dataStart + size;
+
+    if (dataEnd > tar.length) throw new Error("export_archive_truncated");
+    const data = tar.subarray(dataStart, dataEnd);
+
+    if (typeFlag === "L") {
+      pendingLongName = data.toString("utf8").replace(/\0.*$/s, "").trim();
+    } else if (typeFlag === "x") {
+      pendingPaxPath = parsePaxPath(data);
+    } else if (typeFlag === "0" || typeFlag === "\0") {
+      const rawPath = pendingPaxPath || pendingLongName || headerPath;
+      pendingLongName = null;
+      pendingPaxPath = null;
+      const deployPath = normalizePath(rawPath);
+
+      if (deployPath && !shouldExcludeDeployPath(deployPath)) {
+        const content = Buffer.from(data);
+        files.push({
+          deployPath,
+          content,
+          sha: createHash("sha1").update(content).digest("hex"),
+        });
+      }
+    }
+
+    const paddedSize = Math.ceil(size / 512) * 512;
+    offset = dataStart + paddedSize;
+  }
+
+  if (files.length === 0) throw new Error("no_deployable_files_found_in_export");
+  if (files.length > MAX_FILES) throw new Error(`too_many_deployable_files_${files.length}`);
+
+  const totalBytes = files.reduce((sum, file) => sum + file.content.length, 0);
+  if (totalBytes > MAX_SOURCE_BYTES) throw new Error(`source_files_too_large_${totalBytes}`);
+  if (!files.some((file) => file.deployPath === "package.json")) {
+    throw new Error("package_json_not_found_in_export");
+  }
+
+  return files;
 }
 
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
-  worker: (item: T, index: number) => Promise<R>,
+  worker: (item: T) => Promise<R>,
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let nextIndex = 0;
+
   async function runWorker() {
     while (true) {
-      const currentIndex = nextIndex++;
-      if (currentIndex >= items.length) return;
-      results[currentIndex] = await worker(items[currentIndex], currentIndex);
+      const index = nextIndex++;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index]);
     }
   }
+
   await Promise.all(
     Array.from({ length: Math.min(concurrency, Math.max(1, items.length)) }, () => runWorker()),
   );
   return results;
-}
-
-async function hydrateDeployableFiles(
-  environmentId: string,
-  files: DeployableFile[],
-  apiKey: string,
-): Promise<DeployableFile[]> {
-  const hydrated = await mapWithConcurrency(files, UPLOAD_CONCURRENCY, async (file) => {
-    const content = await downloadEnvironmentFile(environmentId, file.sourcePath, apiKey);
-    const sha = createHash("sha1").update(content).digest("hex");
-    return { ...file, size: content.length, content, sha };
-  });
-  const totalBytes = hydrated.reduce((sum, file) => sum + (file.content?.length || 0), 0);
-  if (totalBytes > MAX_TOTAL_BYTES) {
-    throw new Error(`downloaded_source_files_too_large_${totalBytes}`);
-  }
-  return hydrated;
 }
 
 function teamQuery(teamId: string): string {
@@ -210,7 +303,6 @@ async function uploadFileToVercel(
   token: string,
   teamId: string,
 ): Promise<void> {
-  if (!file.content || !file.sha) throw new Error(`missing_file_content_${file.deployPath}`);
   const response = await fetch(`${VERCEL_API_BASE}/v2/files?${teamQuery(teamId)}`, {
     method: "POST",
     headers: {
@@ -219,12 +311,27 @@ async function uploadFileToVercel(
       "Content-Length": String(file.content.length),
       "x-vercel-digest": file.sha,
     },
-    body: file.content,
+    body: file.content.buffer.slice(
+      file.content.byteOffset,
+      file.content.byteOffset + file.content.byteLength,
+    ) as ArrayBuffer,
   });
+
   if (!response.ok) {
     const details = await readErrorResponse(response);
     throw new Error(`vercel_file_upload_failed_${response.status}_${file.deployPath}_${details}`);
   }
+}
+
+async function uploadFilesToVercel(
+  files: DeployableFile[],
+  token: string,
+  teamId: string,
+): Promise<void> {
+  await mapWithConcurrency(files, UPLOAD_CONCURRENCY, async (file) => {
+    await uploadFileToVercel(file, token, teamId);
+    return true;
+  });
 }
 
 async function getVercelProject(projectName: string, token: string, teamId: string): Promise<any | null> {
@@ -243,9 +350,13 @@ async function getVercelProject(projectName: string, token: string, teamId: stri
 async function ensureVercelProject(projectName: string, token: string, teamId: string): Promise<any> {
   const existing = await getVercelProject(projectName, token, teamId);
   if (existing) return existing;
+
   const response = await fetch(`${VERCEL_API_BASE}/v9/projects?${teamQuery(teamId)}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ name: projectName, framework: "nextjs" }),
   });
   if (!response.ok) {
@@ -262,23 +373,28 @@ async function createVercelDeployment(
   teamId: string,
   companyName?: string,
 ): Promise<any> {
-  const body: Record<string, any> = {
+  const body: Record<string, unknown> = {
     name: projectName,
     files: files.map((file) => ({
       file: file.deployPath,
       sha: file.sha,
-      size: file.content?.length || file.size,
+      size: file.content.length,
     })),
     projectSettings: { framework: "nextjs" },
   };
-  if (companyName && companyName.trim()) {
+  if (companyName?.trim()) {
     body.meta = { company_name: companyName.trim() };
   }
+
   const response = await fetch(`${VERCEL_API_BASE}/v13/deployments?${teamQuery(teamId)}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(body),
   });
+
   if (!response.ok) {
     const details = await readErrorResponse(response);
     throw new Error(`vercel_deployment_failed_${response.status}_${details}`);
@@ -286,12 +402,15 @@ async function createVercelDeployment(
   return response.json();
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
+  let stage = "request_received";
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "method_not_allowed" });
   }
 
   try {
+    stage = "authenticate";
+    console.info("deploy-demo stage", stage);
     const workflowSecret = requireEnv("WORKFLOW_SECRET");
     const suppliedSecret = req.headers["x-workflow-secret"];
     if (typeof suppliedSecret !== "string" || suppliedSecret !== workflowSecret) {
@@ -303,48 +422,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const vercelTeamId = requireEnv("VERCEL_TEAM_ID");
     const projectName = process.env.VERCEL_DEMO_PROJECT || "website-demos";
 
-    const environmentId = typeof req.body?.environment_id === "string" ? req.body.environment_id.trim() : "";
-    const companyName = typeof req.body?.company_name === "string" ? req.body.company_name.trim() : "";
+    const previousInteractionId =
+      typeof req.body?.interaction_id === "string" ? req.body.interaction_id.trim() : "";
+    const environmentId =
+      typeof req.body?.environment_id === "string" ? req.body.environment_id.trim() : "";
+    const companyName =
+      typeof req.body?.company_name === "string" ? req.body.company_name.trim() : "";
 
+    if (!previousInteractionId) {
+      return res.status(400).json({ ok: false, error: "missing_interaction_id" });
+    }
     if (!environmentId) {
       return res.status(400).json({ ok: false, error: "missing_environment_id" });
     }
 
-    const environment = await getEnvironment(environmentId, geminiApiKey);
-    const listedFiles = await listEnvironmentFiles(environmentId, "workspace/site", geminiApiKey);
-    const selectedFiles = selectDeployableFiles(listedFiles);
-    const hydratedFiles = await hydrateDeployableFiles(environmentId, selectedFiles, geminiApiKey);
+    stage = "create_export_interaction";
+    console.info("deploy-demo stage", stage, { environmentId });
+    const exportInteraction = await createExportInteraction(
+      previousInteractionId,
+      environmentId,
+      geminiApiKey,
+    );
+    stage = "wait_export_interaction";
+    console.info("deploy-demo stage", stage, { exportInteractionId: exportInteraction.id, status: exportInteraction.status });
+    const completedExport = await waitForInteraction(exportInteraction, geminiApiKey);
+    console.info("deploy-demo export completed", { id: completedExport.id, status: completedExport.status });
 
+    stage = "download_export_archive";
+    console.info("deploy-demo stage", stage, { path: EXPORT_PATH });
+    const archive = await downloadEnvironmentFile(environmentId, EXPORT_PATH, geminiApiKey);
+    console.info("deploy-demo archive downloaded", { bytes: archive.length });
+    stage = "parse_export_archive";
+    const files = parseTarGz(archive);
+    console.info("deploy-demo archive parsed", { files: files.length });
+
+    stage = "ensure_vercel_project";
     await ensureVercelProject(projectName, vercelToken, vercelTeamId);
-    await mapWithConcurrency(hydratedFiles, UPLOAD_CONCURRENCY, async (file) => {
-      await uploadFileToVercel(file, vercelToken, vercelTeamId);
-      return true;
-    });
-
+    stage = "upload_vercel_files";
+    await uploadFilesToVercel(files, vercelToken, vercelTeamId);
+    stage = "create_vercel_deployment";
     const deployment = await createVercelDeployment(
       projectName,
-      hydratedFiles,
+      files,
       vercelToken,
       vercelTeamId,
       companyName,
     );
 
+    const deploymentUrl = deployment?.url ? `https://${deployment.url}` : null;
+    const sourceBytes = files.reduce((sum, file) => sum + file.content.length, 0);
+
     return res.status(202).json({
       ok: true,
       deployment_id: deployment?.id || null,
-      deployment_url: deployment?.url ? `https://${deployment.url}` : null,
+      deployment_url: deploymentUrl,
       deployment_status: deployment?.readyState || deployment?.status || "INITIALIZING",
       project_id: deployment?.projectId || deployment?.project?.id || null,
-      source_file_count: hydratedFiles.length,
-      source_bytes: hydratedFiles.reduce((sum, file) => sum + (file.content?.length || 0), 0),
-      environment_status: environment?.status || null,
-      environment_size_bytes: environment?.size_bytes || null,
+      source_file_count: files.length,
+      source_bytes: sourceBytes,
+      export_archive_bytes: archive.length,
+      export_interaction_id: completedExport.id || null,
+      export_status: completedExport.status || null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Demo deployment failed", error);
     return res.status(502).json({
       ok: false,
       error: "demo_deployment_failed",
+      stage,
       details: error instanceof Error ? error.message : String(error),
     });
   }
