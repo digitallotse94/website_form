@@ -12,6 +12,9 @@ const MAX_FILES = 400;
 const MAX_SOURCE_BYTES = 40 * 1024 * 1024;
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const UPLOAD_CONCURRENCY = 4;
+const EXPORT_POLL_INTERVAL_MS = 3000;
+const EXPORT_WAIT_TIMEOUT_MS = 180_000;
+const EXPORT_MAX_CONTINUATIONS = 2;
 
 interface InteractionResponse {
   id?: string;
@@ -77,7 +80,7 @@ async function createExportInteraction(
       background: true,
       agent_config: {
         type: "antigravity",
-        max_total_tokens: 12000,
+        max_total_tokens: 30000,
       },
     }),
   });
@@ -85,6 +88,43 @@ async function createExportInteraction(
   if (!response.ok) {
     const details = await readErrorResponse(response);
     throw new Error(`export_interaction_create_failed_${response.status}_${details}`);
+  }
+
+  return (await response.json()) as InteractionResponse;
+}
+
+async function continueExportInteraction(
+  previousInteractionId: string,
+  environmentId: string,
+  apiKey: string,
+): Promise<InteractionResponse> {
+  const prompt = `Continue and finish the existing deployment archive export.
+
+1. Reuse all work already completed in the current environment.
+2. If /workspace/site-export.tar.gz already exists and is non-empty, verify it and finish.
+3. Otherwise create the archive from the CONTENTS of /workspace/site with the same exclusions as before.
+4. Do not modify source files, rebuild, install packages, or deploy.
+5. Finish only when the archive exists and is non-empty, then report its byte size.`;
+
+  const response = await fetch(`${GOOGLE_API_BASE}/interactions`, {
+    method: "POST",
+    headers: googleHeaders(apiKey, true),
+    body: JSON.stringify({
+      agent: ANTIGRAVITY_AGENT,
+      input: prompt,
+      previous_interaction_id: previousInteractionId,
+      environment: environmentId,
+      background: true,
+      agent_config: {
+        type: "antigravity",
+        max_total_tokens: 30000,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await readErrorResponse(response);
+    throw new Error(`export_interaction_continue_failed_${response.status}_${details}`);
   }
 
   return (await response.json()) as InteractionResponse;
@@ -107,24 +147,47 @@ function sleep(ms: number): Promise<void> {
 
 async function waitForInteraction(
   interaction: InteractionResponse,
+  environmentId: string,
   apiKey: string,
 ): Promise<InteractionResponse> {
   if (!interaction.id) throw new Error("export_interaction_missing_id");
+
   let current = interaction;
-  const deadline = Date.now() + 150_000;
+  let continuations = 0;
+  const deadline = Date.now() + EXPORT_WAIT_TIMEOUT_MS;
 
-  while (current.status === "in_progress" && Date.now() < deadline) {
-    await sleep(3000);
-    current = await getInteraction(interaction.id, apiKey);
+  while (Date.now() < deadline) {
+    while (current.status === "in_progress" && Date.now() < deadline) {
+      await sleep(EXPORT_POLL_INTERVAL_MS);
+      if (!current.id) throw new Error("export_interaction_missing_id");
+      current = await getInteraction(current.id, apiKey);
+    }
+
+    if (current.status === "completed") {
+      return current;
+    }
+
+    if (
+      current.status === "incomplete" &&
+      continuations < EXPORT_MAX_CONTINUATIONS &&
+      Date.now() < deadline
+    ) {
+      if (!current.id) throw new Error("export_interaction_missing_id");
+      continuations += 1;
+      console.info("deploy-demo continuing incomplete export", {
+        previousInteractionId: current.id,
+        continuation: continuations,
+      });
+      current = await continueExportInteraction(current.id, environmentId, apiKey);
+      continue;
+    }
+
+    throw new Error(
+      `export_interaction_not_completed_${current.status || "unknown"}_${JSON.stringify(current.error || null)}`,
+    );
   }
 
-  if (current.status === "in_progress") {
-    throw new Error("export_interaction_timeout");
-  }
-  if (current.status !== "completed") {
-    throw new Error(`export_interaction_not_completed_${current.status || "unknown"}_${JSON.stringify(current.error || null)}`);
-  }
-  return current;
+  throw new Error("export_interaction_timeout");
 }
 
 async function downloadEnvironmentFile(
@@ -445,7 +508,7 @@ export default async function handler(req: any, res: any) {
     );
     stage = "wait_export_interaction";
     console.info("deploy-demo stage", stage, { exportInteractionId: exportInteraction.id, status: exportInteraction.status });
-    const completedExport = await waitForInteraction(exportInteraction, geminiApiKey);
+    const completedExport = await waitForInteraction(exportInteraction, environmentId, geminiApiKey);
     console.info("deploy-demo export completed", { id: completedExport.id, status: completedExport.status });
 
     stage = "download_export_archive";
