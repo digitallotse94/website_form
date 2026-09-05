@@ -59,7 +59,10 @@ vollständig funktionsfähige, hochwertige Demo-Website zu erstellen.
 ARBEITSWEISE
 
 - Arbeite ausschließlich im Verzeichnis /workspace/site.
-- Erstelle dort ein vollständiges startfähiges Webprojekt.
+- Prüfe zuerst die vorhandene Projektstruktur und arbeite direkt im bereits
+  vorhandenen Projekt unter /workspace/site weiter.
+- Erstelle niemals ein zweites oder verschachteltes Projekt und niemals eine
+  zweite package.json unterhalb von /workspace/site.
 - Verwende React und TypeScript.
 - Bevorzuge Next.js mit App Router und Tailwind CSS.
 - Verwende nur notwendige Dependencies.
@@ -72,6 +75,20 @@ ARBEITSWEISE
 - Erstelle keine Backend-, Datenbank- oder Authentifizierungsfunktionen,
   sofern sie nicht ausdrücklich benötigt werden.
 
+AKTIVE STARTSEITE
+
+- Die tatsächlich ausgelieferte Route / muss die neue Unternehmenswebsite sein.
+- Wenn /workspace/site/app/page.tsx existiert, ersetze genau diese Datei.
+- Wenn stattdessen /workspace/site/src/app/page.tsx existiert, ersetze genau
+  diese Datei. Erstelle niemals gleichzeitig app/page.* und src/app/page.*.
+- Falls das Projekt den Pages Router verwendet, ersetze die vorhandene aktive
+  pages/index.* beziehungsweise src/pages/index.*.
+- Neue Komponenten müssen von dieser aktiven Startseite importiert und dort
+  sichtbar gerendert werden. Nur unreferenzierte Komponenten zu erstellen gilt
+  nicht als fertige Umsetzung.
+- Entferne die komplette Next.js-/Vercel-Starteroberfläche und alle Verweise auf
+  next.svg oder vercel.svg von der aktiven Website.
+
 QUALITÄTSSICHERUNG
 
 Nach der Erstellung:
@@ -82,6 +99,11 @@ Nach der Erstellung:
 4. Behebe die Fehler selbstständig.
 5. Wiederhole den Build, bis er erfolgreich ist.
 6. Prüfe die Projektstruktur auf offensichtliche Probleme.
+7. Starte die gebaute Website lokal und rufe die Route / per HTTP ab.
+8. Prüfe im zurückgegebenen HTML, dass der echte Unternehmensname sichtbar ist.
+9. Prüfe, dass weder "To get started", "Create Next App", "/next.svg" noch
+   "/vercel.svg" im HTML der Route / vorkommen.
+10. Beende den lokalen Testserver anschließend wieder.
 
 WICHTIG
 
@@ -110,6 +132,13 @@ ${vibePrompt}
 
 Setze die Spezifikation vollständig um und führe anschließend die
 Qualitätssicherung inklusive Produktions-Build durch.
+
+VERBINDLICHE ABNAHMEKRITERIEN
+
+- Die aktive Route / zeigt die Website für "${companyName}".
+- Der Name "${companyName}" kommt im HTML der lokal aufgerufenen Route / vor.
+- Die Default-Startseite von Next.js/Vercel ist vollständig ersetzt.
+- Es gibt kein zweites oder verschachteltes Webprojekt.
 `;
 
   try {

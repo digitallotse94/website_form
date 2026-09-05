@@ -39,10 +39,15 @@ export default async function handler(req: any, res: any) {
       ? req.body.environment_id.trim()
       : "";
 
-  if (!interactionId || !environmentId) {
+  const companyName =
+    typeof req.body?.company_name === "string"
+      ? req.body.company_name.trim()
+      : "";
+
+  if (!interactionId || !environmentId || !companyName) {
     return res.status(400).json({
       ok: false,
-      error: "missing_interaction_or_environment_id",
+      error: "missing_interaction_environment_or_company_name",
     });
   }
 
@@ -74,6 +79,19 @@ PRIORITÄTEN:
 8. Sicherstellen, dass die fertige Website vollständig unter /workspace/site liegt.
 9. Keine Deployment-Schritte durchführen.
 10. Keine Unternehmensfakten erfinden.
+11. Kein zweites oder verschachteltes Projekt und keine zweite package.json
+    unter /workspace/site erstellen.
+12. Die bereits aktive Startseite ersetzen: app/page.* oder src/app/page.*
+    beziehungsweise beim Pages Router pages/index.* oder src/pages/index.*.
+    Niemals mehrere konkurrierende Startseiten anlegen.
+13. Sicherstellen, dass alle erstellten Komponenten von der aktiven Route /
+    importiert und dort sichtbar gerendert werden.
+14. Die Next.js-/Vercel-Starteroberfläche vollständig entfernen.
+15. Nach dem erfolgreichen Build die gebaute Website lokal starten, / per HTTP
+    abrufen und anschließend den Testserver wieder beenden.
+16. Im HTML der Route / muss der Unternehmensname "${companyName}" vorkommen.
+17. Im HTML der Route / dürfen "To get started", "Create Next App",
+    "/next.svg" und "/vercel.svg" nicht vorkommen.
 
 Ziel dieses Durchgangs ist ausschließlich:
 FERTIGSTELLEN → BUILD PRÜFEN → FEHLER BEHEBEN → ABSCHLIESSEN.
@@ -106,6 +124,7 @@ Gib am Ende eine kurze Zusammenfassung mit:
         continuation.environment_id ?? environmentId,
 
       status: continuation.status ?? "in_progress",
+      company_name: companyName,
     });
   } catch (error) {
     console.error("Antigravity continuation failed", error);
