@@ -141,8 +141,7 @@ if (!generated.blueprint || !generated.website_copy) {
 
 
   const vibePrompt = buildV0Prompt(
-    input.company_name,
-    input.existing_website,
+    input,
     generated.blueprint,
     generated.website_copy
   );
@@ -334,8 +333,11 @@ Erstelle in EINEM Durchgang:
 
 GRUNDREGELN
 - Erfinde niemals Fakten, Referenzen, Bewertungen, Mitarbeiterzahlen, Jahreszahlen, Zertifikate, Preise, Öffnungszeiten oder Leistungsversprechen.
-- Informationen aus einer vorhandenen Website gelten als Quelle und haben Vorrang vor Vermutungen.
-- Formularangaben haben ebenfalls hohe Priorität.
+- Die direkten Formularangaben sind die verbindliche Hauptquelle und haben immer Vorrang.
+- Eine vorhandene Website darf als ergänzende Quelle für Leistungen, bestehende Texte und das Markendesign verwendet werden. Sie kann jedoch veraltete Inhalte enthalten.
+- Veränderliche Angaben wie Personen, Geschäftsführung, Team, Zuständigkeiten, Kontaktdaten, Preise und Öffnungszeiten dürfen nur übernommen werden, wenn sie direkt im Formular bestätigt wurden.
+- Erstelle keine Teamsektion und nenne keine Personen, wenn dafür keine bestätigten Formulardaten vorliegen.
+- Bei widersprüchlichen oder möglicherweise veralteten Angaben darfst du keine Entscheidung durch Vermutung treffen. Lasse den Inhalt weg oder kennzeichne ihn unter fehlende Informationen.
 - Fehlende Informationen im Blueprint klar als fehlend kennzeichnen.
 - In sichtbaren Website-Texten niemals "unbekannt" schreiben.
 - Wenn eine zwingend benötigte Information fehlt, verwende sparsam einen klaren Platzhalter wie [ERGÄNZEN: Telefonnummer].
@@ -391,51 +393,217 @@ Die Ausgabe muss exakt dem vorgegebenen JSON-Schema entsprechen.`;
 }
 
 function buildV0Prompt(
-  companyName: string,
-  existingWebsite: string,
+  data: BusinessInput,
   blueprint: JsonRecord,
   websiteCopy: JsonRecord
 ): string {
-  const sourceNote = existingWebsite
-    ? `Bestehende Website als Informationsquelle: ${existingWebsite}`
+  const sourceNote = data.existing_website
+    ? data.existing_website
     : "Keine bestehende Website vorhanden.";
 
-  return `Erstelle eine professionelle, mobile-first Unternehmens-Visitenkarten-Website als Onepager für ${companyName}.
+  const directFormData = {
+    company_name: data.company_name,
+    industry: data.industry,
+    location: data.location,
+    primary_goal: data.primary_goal,
+    primary_goal_other: data.primary_goal_other,
+    services: data.services,
+    differentiators: data.differentiators,
+    preferred_cta: data.preferred_cta,
+    has_existing_website: data.has_existing_website,
+    existing_website: data.existing_website
+  };
+
+  return `Du bist Senior-Webdesigner:in, UX-Spezialist:in und erfahrene:r React-Entwickler:in. Erstelle einen hochwertigen, präsentationsfähigen Onepager für ${data.company_name}.
+
+AUFTRAG
+Entwickle eine individuelle Unternehmenswebsite, die innerhalb weniger Sekunden vermittelt:
+1. Was bietet der Betrieb an?
+2. Für wen und in welcher Region?
+3. Was unterscheidet ihn von anderen?
+4. Welche Handlung sollen Besucher:innen als Nächstes ausführen?
+
+Die Website darf nicht wie ein generisches KI-, SaaS- oder Baukasten-Template wirken. Gestaltung, Bildsprache, Seitenaufbau und Tonalität müssen erkennbar zum konkreten Unternehmen und seiner Branche passen.
+
+Arbeite ohne Rückfragen. Wenn Informationen fehlen, reduziere den Inhalt sinnvoll oder verwende ausdrücklich gekennzeichnete Platzhalter.
 
 TECHNISCHER STACK
-- React/TypeScript
-- moderne komponentenbasierte Struktur
-- vollständig responsive für Smartphone, Tablet und Desktop
+- React und TypeScript
+- mobile-first und vollständig responsiv
+- optimiert für Smartphone, Tablet und Desktop
 - semantisches HTML
+- klare, wartbare Komponentenstruktur
+- zentrale CSS-Variablen für Farben, Abstände und Typografie
 - keine unnötigen Abhängigkeiten
+- keine Analytics-, Tracking- oder Cookie-Skripte
+- keine extern geladenen Schriftarten, sofern sie nicht ausdrücklich vorgegeben wurden
+- performante und barrierearme Umsetzung
+- direkt startbar und ohne Build-Fehler
 
-ZIEL
-Baue ohne Rückfragen einen hochwertigen, individuellen Onepager auf Basis des folgenden Blueprints und der fertigen Website-Texte. Die Website soll zur Branche und Tonalität passen und nicht wie ein generisches Template wirken.
+PRIORITÄT DER INFORMATIONEN
+Verwende Informationen in dieser Reihenfolge:
+1. DIREKTE FORMULARDATEN: Diese Angaben wurden vom Unternehmen übermittelt und sind verbindlich.
+2. WEBSITE-BLUEPRINT: Er dient als strategische Empfehlung für Aufbau, Ziel und Inhalte.
+3. VORBEREITETE WEBSITE-TEXTE: Nutze sie als redaktionelle Grundlage. Du darfst sie für Layout und Verständlichkeit geringfügig kürzen, aber keine neuen Tatsachenbehauptungen ergänzen.
+4. BESTEHENDE WEBSITE: Sie dient als wichtige Quelle für das vorhandene Markendesign, ist aber keine verlässliche Quelle für veränderliche Unternehmensangaben.
 
+Bei Widersprüchen haben die direkten Formulardaten immer Vorrang.
+
+UMGANG MIT FAKTEN
+- Erfinde keine Personen, Funktionen, Referenzen, Projekte, Bewertungen, Kundenstimmen, Kennzahlen, Preise, Auszeichnungen, Zertifikate, Mitgliedschaften, Öffnungszeiten, Adressen, Kontaktdaten oder Unternehmensgeschichte.
+- Veränderliche Angaben wie Geschäftsführung, Team, Telefonnummern, E-Mail-Adressen, Preise und Öffnungszeiten dürfen nur verwendet werden, wenn sie in den direkten Formulardaten ausdrücklich genannt wurden.
+- Informationen von einer bestehenden Website oder aus einer Websuche dürfen hierfür nicht ungeprüft übernommen werden.
+- Fehlt eine verlässliche Angabe, lasse sie weg oder verwende einen eindeutig sichtbaren Platzhalter wie [Telefonnummer ergänzen].
+- Erstelle keine Teamsektion, wenn keine bestätigten Personen geliefert wurden.
+
+BESTEHENDES MARKENDESIGN ÜBERNEHMEN
+Wenn eine bestehende Unternehmenswebsite angegeben wurde, untersuche sie vor der Gestaltung gezielt auf:
+- das vorhandene Unternehmenslogo,
+- primäre und ergänzende Markenfarben,
+- typische Hintergrundfarben,
+- Schriftwirkung und typografische Hierarchie,
+- wiederkehrende Formen, Linien und Gestaltungselemente,
+- Bildsprache sowie den Stil von Schaltflächen und Navigation.
+
+Wenn eine erkennbare Markenidentität vorhanden ist, übertrage sie in ein moderneres und klareres Webdesign. Die neue Website soll weiterhin eindeutig zum Unternehmen gehören und nicht wie eine vollständig andere Marke wirken.
+
+LOGO
+Wenn auf der offiziellen bestehenden Unternehmenswebsite ein eindeutig zuordenbares Firmenlogo öffentlich zugänglich ist:
+- übernimm dieses Logo in das Projekt,
+- speichere es als lokales Projekt-Asset,
+- verwende keine instabile externe Verlinkung,
+- bewahre Seitenverhältnis und Proportionen,
+- verzerre, beschneide oder verfärbe es nicht,
+- bevorzuge eine hochauflösende SVG-, PNG- oder WebP-Version.
+
+Verwende keine Logos aus Branchenverzeichnissen, Suchergebnissen oder fremden Plattformen. Wenn das Logo nicht zuverlässig übernommen werden kann, verwende den Unternehmensnamen als zurückhaltende typografische Wortmarke. Erfinde kein neues Logo.
+
+FARBEN
+Leite die Farbpalette bevorzugt aus dem vorhandenen Logo und den wiederkehrenden Gestaltungselementen der bestehenden Website ab. Unterscheide echte Markenfarben von zufälligen Farben aus Fotos, Werbebannern, Cookie-Fenstern, Drittanbieter-Elementen oder Social-Media-Inhalten.
+
+Reduziere die Farbpalette auf:
+- eine dominante Markenfarbe,
+- höchstens eine ergänzende Akzentfarbe,
+- gut abgestimmte neutrale Hintergrund- und Textfarben.
+
+Entwickle daraus eine moderne, barrierearme Farbpalette mit ausreichenden Kontrasten. Wenn keine erkennbare Markenidentität vorhanden ist, verwende eine hochwertige neutrale Basis und einen zur Branche passenden Akzent. Verwende nicht automatisch ein blaues Standarddesign.
+
+GESTALTUNGSAUFGABE
+Leite aus Branche, Leistungen, Zielgruppe, Standort, Alleinstellungsmerkmalen und bestehendem Markendesign ein eigenständiges visuelles Konzept ab. Entscheide dich intern für eine klare Gestaltungsrichtung und setze sie konsequent um.
+
+Definiere:
+- eine erkennbare visuelle Leitidee,
+- eine zum Unternehmen passende Farbwelt,
+- eine klare Schrift- und Größenhierarchie,
+- einen konsistenten Umgang mit Flächen, Linien, Bildern und Abständen,
+- eine nachvollziehbare CTA-Hierarchie,
+- einen abwechslungsreichen, aber ruhigen Seitenrhythmus.
+
+RUHIGES UND ÜBERSICHTLICHES LAYOUT
+Die Website soll großzügig, klar und leicht erfassbar wirken. Versuche nicht, möglichst viele Inhalte gleichzeitig sichtbar zu machen.
+
+Beachte verbindlich:
+- Inhalte nicht in zu kleine Spalten oder Karten pressen.
+- Keine überlappenden Text-, Bild- oder Dekorationselemente.
+- Keine verschachtelten Karten innerhalb anderer Karten.
+- Auf Desktop höchstens drei inhaltliche Karten nebeneinander.
+- Auf Tablets höchstens zwei Karten nebeneinander.
+- Auf Smartphones alle umfangreichen Inhalte untereinander darstellen.
+- Eine Karte oder Spalte sollte in der Regel mindestens 280 Pixel breit sein.
+- Zwischen nebeneinanderstehenden Elementen ausreichend Abstand lassen.
+- Bei längeren Texten großzügige einspaltige Layouts bevorzugen.
+- Bild und Text nur dann nebeneinanderstellen, wenn beide ausreichend Platz erhalten.
+- Textzeilen auf eine gut lesbare Länge begrenzen.
+- Absätze kurz halten und umfangreiche Inhalte sinnvoll kürzen oder aufteilen.
+- Pro Abschnitt nur eine zentrale Botschaft vermitteln.
+- Nicht jeden gelieferten Inhalt in eine eigene sichtbare Box setzen.
+- Zwischen den Hauptabschnitten ausreichend Weißraum einsetzen.
+- Im Hero höchstens zwei Handlungsaufforderungen zeigen.
+- Auf kleinen Bildschirmen keine Desktop-Anordnung künstlich beibehalten.
+
+Wenn Inhalte nicht sinnvoll nebeneinander passen, ordne sie untereinander an. Übersichtlichkeit hat Vorrang vor einer besonders kompakten Seitendarstellung.
+
+Der Onepager sollte in der Regel aus fünf bis sieben klar unterscheidbaren Hauptabschnitten bestehen. Fasse verwandte Inhalte zusammen, anstatt für jeden Datenpunkt eine neue Sektion zu erstellen.
+
+VERMEIDE TYPISCHE KI-TEMPLATES
+Vermeide insbesondere:
+- austauschbare SaaS-Optik,
+- Farbverläufe ohne Markenbezug,
+- dekorative Blobs und zufällige geometrische Formen,
+- übermäßig abgerundete oder verschachtelte Karten,
+- überall schwebende Boxen,
+- große Mengen identischer Karten,
+- nichtssagende Icons in farbigen Kreisen,
+- übertriebene Schatten,
+- beliebige Stockfoto-Motive,
+- unnötige Slider,
+- erfundene Statistiken, Kundenlogos oder Testimonials,
+- übermäßige Animationen,
+- eine Aneinanderreihung gleich aussehender Abschnitte.
+
+Karten dürfen nur verwendet werden, wenn Inhalte tatsächlich voneinander getrennte Leistungen oder Schritte darstellen. Nutze zusätzlich Bild-Text-Kompositionen, hervorgehobene Aussagen, klare Listen, Prozessdarstellungen oder ruhige redaktionelle Abschnitte.
+
+AUFBAU DES ONEPAGERS
+Nutze den gelieferten Blueprint als Grundlage, aber übersetze ihn in eine gestalterisch schlüssige Seite. Nicht jeder Inhalt benötigt eine eigene Sektion.
+
+Die Seite sollte grundsätzlich enthalten:
+- Header mit vorhandenem Logo oder Wortmarke,
+- kompakte Anchor-Navigation,
+- Hero mit klarem Nutzenversprechen und primärem CTA,
+- früh sichtbaren Vertrauens- oder Differenzierungsfaktor,
+- verständliche Darstellung der wichtigsten Leistungen,
+- passende weitere Inhalte aus dem Blueprint,
+- abschließenden Kontakt- oder CTA-Bereich,
+- Footer mit Unternehmensname sowie Links zu Impressum und Datenschutz.
+
+Im sichtbaren Hero-Bereich müssen Unternehmen, Leistung und primäre Handlung schnell verständlich sein. Vermeide leere Werbeaussagen wie „Willkommen bei uns“, „Ihre Zukunft beginnt hier“, „Innovation neu gedacht“ oder „Qualität trifft Leidenschaft“.
+
+Wiederhole den primären CTA an mindestens einer weiteren sinnvollen Stelle. Verwende einen sekundären CTA nur, wenn er ein anderes nachvollziehbares Ziel besitzt. Alle Navigationspunkte und Schaltflächen müssen auf vorhandene Bereiche oder bestätigte URLs führen.
+
+BILDER UND MEDIEN
+- Orientiere dich am gelieferten Bildbriefing und an der Bildsprache der bestehenden Unternehmenswebsite.
+- Bilder sollen glaubwürdig zur Branche passen, echte Arbeitssituationen oder nachvollziehbare Ergebnisse zeigen und die Inhalte unterstützen.
+- Verwende keine erfundenen Firmenprojekte oder angeblichen Beschäftigten.
+- Wenn kein geeignetes Bild verfügbar ist, nutze einen hochwertig gestalteten Platzhalter mit einer konkreten Beschreibung des benötigten Motivs.
+- Verwende keine instabilen oder offensichtlich unpassenden externen Bildquellen.
+
+TEXTREGELN
+- Nutze die vorbereiteten Website-Texte.
+- Schreibe klar, konkret und verständlich.
+- Vermeide übertriebene Werbesprache, nicht belegte Superlative und generische KI-Floskeln.
+- Verwende kein Lorem ipsum.
+- Ergänze keine Leistungen, die nicht genannt wurden.
+- Wiederhole dieselbe Aussage nicht in mehreren Abschnitten.
+- Halte Überschriften kurz und aussagekräftig.
+- Verwende die vorgesehene Ansprache konsequent.
+- Übernimm SEO-Titel und Meta-Description aus den gelieferten Daten.
+
+BARRIEREFREIHEIT UND QUALITÄT
+Achte auf ausreichende Farbkontraste, sichtbare Fokuszustände, vollständige Tastaturbedienbarkeit, eine sinnvolle Überschriftenstruktur, verständliche Link- und Buttontexte, sinnvolle Alt-Texte, korrekt beschriftete Formularfelder, gut lesbare Schriftgrößen und ausreichend große Bedienflächen. Verhindere horizontales Scrollen. Beachte die Systemeinstellung für reduzierte Bewegungen.
+
+Animationen dürfen nur dezent eingesetzt werden und müssen die Bedienung unterstützen.
+
+ABSCHLUSSPRÜFUNG
+Beende die Aufgabe nicht nach dem ersten Gerüst. Prüfe vor Abschluss:
+- Wurden vorhandenes Logo und Markenfarben erkannt und sinnvoll übernommen?
+- Passt die Gestaltung sichtbar zu diesem konkreten Unternehmen?
+- Wirkt die Seite ruhig und übersichtlich?
+- Sind keine Elemente zu eng nebeneinander angeordnet?
+- Ist der Hero auf einem Smartphone sofort verständlich?
+- Sind alle wichtigen Inhalte enthalten?
+- Wurden keine unbestätigten Fakten ergänzt?
+- Funktionieren Navigation und CTAs?
+- Sind keine leeren oder offensichtlich unfertigen Bereiche vorhanden?
+- Ist die Seite bei 360, 768, 1024 und 1440 Pixel Breite nutzbar?
+- Startet und baut das Projekt ohne Fehler?
+
+Behebe gefundene Probleme selbstständig. Das Endergebnis muss als fertiger Website-Entwurf präsentiert werden können.
+
+DIREKTE FORMULARDATEN
+${JSON.stringify(directFormData, null, 2)}
+
+BESTEHENDE WEBSITE
 ${sourceNote}
-
-WICHTIGE REGELN
-- Erfinde keine Fakten, Referenzen, Bewertungen, Kennzahlen, Zertifikate, Auszeichnungen, Mitarbeiter oder Projekte.
-- Verwende die gelieferten Texte und Fakten.
-- Kein Lorem ipsum.
-- Wenn kein echtes Logo geliefert wurde, verwende den Unternehmensnamen als saubere Wortmarke. Kein Fantasielogo.
-- Wenn keine belegten Markenfarben vorliegen, erfinde keine vermeintliche Corporate-Farbwelt. Nutze eine hochwertige neutrale Basis und zur Branche passende Akzente.
-- Das Styling soll so strukturiert sein, dass echte Markenfarben später leicht ersetzt werden können.
-- Bilder nur als glaubwürdige neutrale Branchenmotive oder klar erkennbare Platzhalter vorsehen.
-- Keine angeblich echten Firmenprojekte oder Mitarbeiterbilder erfinden.
-- Bildbereiche anhand des gelieferten Bildbriefings umsetzen.
-- Keine Stockfoto-Überladung, unnötigen Slider oder übermäßigen Animationen.
-- Dezente Hover- und Scroll-Effekte nur performant und zurückhaltend.
-- Gute Kontraste, sichtbare Fokuszustände, Tastaturbedienbarkeit und sinnvolle Alt-Texte.
-- Navigation als Anchor-Navigation; mobil als zugängliches Menü.
-- Primären CTA im Hero und an mindestens einer weiteren passenden Stelle wiederholen.
-- Kontaktbereich nur mit tatsächlich vorhandenen Kontaktwegen; markierte Platzhalter beibehalten.
-- Footer mit Unternehmensname und Links zu Impressum und Datenschutz.
-- Keine rechtlichen Inhalte erfinden.
-- Keine Analytics-, Tracking- oder Cookie-Skripte.
-- SEO-Titel und Meta-Description exakt aus den gelieferten Website-Texten übernehmen.
-- Komponenten sinnvoll strukturieren, aber den Onepager nicht over-engineeren.
-- Das Ergebnis soll direkt startbar und präsentationsfähig sein.
 
 WEBSITE-BLUEPRINT
 ${JSON.stringify(blueprint, null, 2)}
@@ -443,7 +611,7 @@ ${JSON.stringify(blueprint, null, 2)}
 FERTIGE WEBSITE-TEXTE
 ${JSON.stringify(websiteCopy, null, 2)}
 
-Setze jetzt die vollständige Website um. Verwende die vorgegebene Abschnittsreihenfolge, Inhalte, CTAs und Bildbriefings.`;
+Setze jetzt die vollständige Website um. Verwende die gelieferten Inhalte, CTAs und Bildbriefings, aber optimiere die Abschnittsreihenfolge, wenn dies für ein ruhigeres und verständlicheres Gesamtergebnis notwendig ist.`;
 }
 
 const S = { type: "string" } as const;
