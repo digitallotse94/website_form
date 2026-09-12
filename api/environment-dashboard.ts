@@ -5,6 +5,7 @@ export const maxDuration = 30;
 const GOOGLE_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const SHEETS_API_BASE = "https://sheets.googleapis.com/v4";
+// The sheet keeps project metadata; Antigravity remains the source of truth for live environments.
 const PROJECT_SHEET_RANGE = "Projekte!A:X";
 
 type EnvironmentRecord = {
