@@ -65,6 +65,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function dashboardCredentials(): { username: string; password: string } | null {
+  // A dedicated dashboard password takes precedence over the workflow secret.
   const password = process.env.ADMIN_PASSWORD || process.env.WORKFLOW_SECRET;
   if (!password) return null;
   return {
