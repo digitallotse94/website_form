@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "sme-website-components",
+  "purpose": "Definiert wiederverwendbare Seitenbausteine, ohne komplette Branchen-Templates zu erzeugen.",
+  "global_rules": {
+    "max_sections_one_pager": 8,
+    "recommended_sections_one_pager": "5-7",
+    "rules": [
+      "Jeder Abschnitt benötigt eine klare inhaltliche Aufgabe.",
+      "Keine Komponente nur zur visuellen Füllung einsetzen.",
+      "Cards nur für gleichrangige scanbare Inhalte verwenden.",
+      "Auf Mobilgeräten sinnvolle Reihenfolge statt bloßer Desktop-Stapelung sicherstellen.",
+      "Primären CTA sprachlich und visuell konsistent halten."
+    ]
+  },
+  "hero_variants": [
+    {"id": "H01", "name": "Balanced Split", "structure": "Text links, Bild rechts", "best_for": ["D01", "D02", "D03", "D06", "D07"], "requires": ["horizontales Bild mit Motiv rechts"], "avoid_when": ["Bild ist alleiniger Hauptverkaufsfaktor"]},
+    {"id": "H02", "name": "Image Led", "structure": "Großes Bild mit separatem, kontrastgesichertem Textbereich", "best_for": ["D04", "D06", "D08", "D09", "D11"], "requires": ["hochwertiges Hero-Bild", "ruhige Bildfläche oder separate Textfläche"], "avoid_when": ["nur mittelmäßiges Bildmaterial vorhanden"]},
+    {"id": "H03", "name": "Statement Type", "structure": "Sehr große Headline, Bild oder Grafik sekundär", "best_for": ["D05", "D10", "D12"], "requires": ["kurze starke Kernbotschaft"], "avoid_when": ["Headline ist länger als etwa 12 Wörter"]},
+    {"id": "H04", "name": "Personal Welcome", "structure": "Person oder Team im Arbeitsumfeld mit direkter Ansprache", "best_for": ["D02", "D07"], "requires": ["authentisches Personenbild"], "avoid_when": ["Personenmarke spielt keine Rolle"]},
+    {"id": "H05", "name": "Product Stage", "structure": "Produkt oder Ergebnis dominant, Nutzenbotschaft kompakt", "best_for": ["D04", "D06", "D08"], "requires": ["starkes Produkt- oder Ergebnisbild"], "avoid_when": ["Angebot ist abstrakt"]},
+    {"id": "H06", "name": "Technical Proof", "structure": "Leistungsbotschaft plus technisches Detail oder Prozessmotiv", "best_for": ["D03", "D06"], "requires": ["fachlich plausibles Technikbild"], "avoid_when": ["emotionaler Service im Vordergrund steht"]},
+    {"id": "H07", "name": "Editorial Cover", "structure": "Titelstory-Anmutung mit Bild, Kicker und Headline", "best_for": ["D04", "D12"], "requires": ["gutes Bild", "redaktionell tragfähige Geschichte"], "avoid_when": ["rein funktionale Kurzseite"]},
+    {"id": "H08", "name": "Raw Poster", "structure": "Harte Typografie, Rahmen oder Farbblock, optional dokumentarisches Bild", "best_for": ["D10"], "requires": ["bewusste Stilfreigabe"], "avoid_when": ["konservative Zielgruppe", "lange Erklärung im Hero"]}
+  ],
+  "content_patterns": [
+    {"id": "C01", "name": "Services Compact", "purpose": "Wenige Kernleistungen schnell erfassbar machen", "structure": "2-4 Leistungen mit Titel, Kurztext und optional kleinem Beleg", "compatible_styles": ["D01", "D02", "D03", "D07"], "max_items": 4},
+    {"id": "C02", "name": "Services Narrative", "purpose": "Leistungen hochwertig und ohne Kartenwand erklären", "structure": "abwechselnde Text-Bild-Reihen", "compatible_styles": ["D04", "D08", "D09", "D12"], "max_items": 4},
+    {"id": "C03", "name": "Product Highlights", "purpose": "Produkte oder sichtbare Ergebnisse präsentieren", "structure": "große Bilder mit kurzen Vorteilen", "compatible_styles": ["D04", "D06", "D08", "D11"], "max_items": 6},
+    {"id": "C04", "name": "Process Steps", "purpose": "Ablauf und Erwartungssicherheit vermitteln", "structure": "3-5 nummerierte Schritte ohne Timeline-Dekoration", "compatible_styles": ["D01", "D02", "D03", "D07", "D09"], "max_items": 5},
+    {"id": "C05", "name": "Proof Projects", "purpose": "Kompetenz durch echte Projekte belegen", "structure": "1-3 Cases mit Ausgangslage, Leistung und Ergebnis", "compatible_styles": ["D03", "D04", "D05", "D06", "D12"], "max_items": 3},
+    {"id": "C06", "name": "People & Expertise", "purpose": "Personen, Qualifikation und Haltung sichtbar machen", "structure": "Porträt oder Teamkontext plus substanzielle Kurzvorstellung", "compatible_styles": ["D02", "D07", "D09", "D12"], "max_items": 4},
+    {"id": "C07", "name": "Trust Evidence", "purpose": "Vertrauen mit belastbaren Belegen stärken", "structure": "Qualifikation, Mitgliedschaft, Bewertung oder Referenz mit Quelle", "compatible_styles": ["D01", "D03", "D07"], "max_items": 4},
+    {"id": "C08", "name": "Brand Story", "purpose": "Herkunft, Haltung oder Entwicklung erzählen", "structure": "kurzer redaktioneller Text mit 1-2 starken Bildern", "compatible_styles": ["D02", "D09", "D11", "D12"], "max_items": 2},
+    {"id": "C09", "name": "FAQ Essential", "purpose": "entscheidungsrelevante Fragen klären", "structure": "4-8 echte Fragen als zugängliches Accordion", "compatible_styles": ["D01", "D02", "D03", "D07"], "max_items": 8},
+    {"id": "C10", "name": "Editorial Feature", "purpose": "Projekt oder Thema ausführlicher erzählen", "structure": "Kicker, Headline, Lesetext, Zitat und Bild", "compatible_styles": ["D04", "D11", "D12"], "max_items": 2},
+    {"id": "C11", "name": "Bold Statements", "purpose": "Positionierung mit knappen Aussagen schärfen", "structure": "2-4 große Aussagen mit sehr kurzem Beleg", "compatible_styles": ["D05", "D10"], "max_items": 4},
+    {"id": "C12", "name": "Atmosphere Gallery", "purpose": "Räume, Erlebnis oder Produktwelt vermitteln", "structure": "3-5 kuratierte Bilder mit klarer Hierarchie", "compatible_styles": ["D04", "D08", "D11", "D12"], "max_items": 5}
+  ],
+  "contact_variants": [
+    {"id": "K01", "name": "Direct Contact", "structure": "Telefon, E-Mail und ein primärer CTA", "best_for": ["D01", "D02", "D03", "D07", "D09"]},
+    {"id": "K02", "name": "Appointment", "structure": "kurze Erwartungserklärung plus Termin-CTA", "best_for": ["D01", "D02", "D07", "D08"]},
+    {"id": "K03", "name": "Request Form", "structure": "kurzes Formular mit nur notwendigen Feldern", "best_for": ["D01", "D03", "D06", "D07"]},
+    {"id": "K04", "name": "Visit & Opening", "structure": "Adresse, Öffnungszeiten, Routenlink und Kontakt", "best_for": ["D02", "D08", "D09", "D11"]},
+    {"id": "K05", "name": "Editorial Close", "structure": "ruhiges Schlussstatement mit Einzel-CTA", "best_for": ["D04", "D12"]},
+    {"id": "K06", "name": "Bold Action", "structure": "große direkte Handlungsaufforderung ohne Zusatzboxen", "best_for": ["D05", "D10"]}
+  ],
+  "assembly_rules": {
+    "required_slots": ["hero", "core_offer", "trust_or_proof", "contact"],
+    "optional_slots": ["process", "people", "story", "faq", "gallery"],
+    "recommended_sequence": ["hero", "core_offer", "proof_or_process", "people_or_story", "faq_optional", "contact"],
+    "rules": [
+      "Maximal einen Inhaltsbaustein pro Zweck auswählen.",
+      "Trust Evidence nur verwenden, wenn echte Nachweise vorliegen.",
+      "FAQ nur mit realen entscheidungsrelevanten Fragen befüllen.",
+      "Galerie nur bei konsistentem, hochwertigem Bildmaterial einsetzen.",
+      "Bei knappen Inhalten Abschnitte weglassen statt künstlich füllen."
+    ]
+  },
+  "style_defaults": {
+    "D01": {"hero": "H01", "content": ["C01", "C04", "C07"], "contact": "K01"},
+    "D02": {"hero": "H04", "content": ["C01", "C06", "C04"], "contact": "K04"},
+    "D03": {"hero": "H06", "content": ["C01", "C04", "C05"], "contact": "K03"},
+    "D04": {"hero": "H02", "content": ["C02", "C05", "C12"], "contact": "K05"},
+    "D05": {"hero": "H03", "content": ["C11", "C05"], "contact": "K06"},
+    "D06": {"hero": "H05", "content": ["C03", "C05", "C04"], "contact": "K03"},
+    "D07": {"hero": "H04", "content": ["C06", "C07", "C09"], "contact": "K02"},
+    "D08": {"hero": "H02", "content": ["C02", "C12", "C06"], "contact": "K04"},
+    "D09": {"hero": "H02", "content": ["C08", "C02", "C04"], "contact": "K01"},
+    "D10": {"hero": "H08", "content": ["C11", "C05"], "contact": "K06"},
+    "D11": {"hero": "H02", "content": ["C08", "C03", "C12"], "contact": "K04"},
+    "D12": {"hero": "H07", "content": ["C10", "C05", "C08"], "contact": "K05"}
+  }
+}
