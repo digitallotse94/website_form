@@ -1,0 +1,765 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "sme-website-design-styles",
+  "language": "de",
+  "project_scope": "Branchenübergreifender Website-Builder für kleine und mittlere Unternehmen",
+  "catalog_principle": "Die Branche bestimmt nicht automatisch den Designstil. Der Stil wird aus Positionierung, Zielgruppe, gewünschter Wirkung, Corporate Identity, Bildmaterial und Inhaltsmenge ausgewählt.",
+  "global_rules": {
+    "design_goal": "Hochwertige, klare digitale Visitenkarte statt Flyer- oder Vertriebsseiten-Optik",
+    "required": [
+      "responsive und mobile-first",
+      "klar erkennbare H1 und logische Überschriftenhierarchie",
+      "ausreichender Farbkontrast für Text, Logo und Bedienelemente",
+      "Corporate-Farben priorisieren, sofern sie nutzbar sind",
+      "großzügige Abstände und klar getrennte Inhaltsbereiche",
+      "sichtbare Fokuszustände und gut bedienbare Navigation",
+      "Bilder passend zum tatsächlichen Unternehmen und Angebot auswählen"
+    ],
+    "forbidden": [
+      "Flyer-Optik",
+      "unnötige Banner oder Schlagwortleisten",
+      "generische Trustbars ohne belastbaren Inhalt",
+      "dekorative Kennzahlen ohne Aussage",
+      "mehrere gleichwertige CTA-Buttons direkt nebeneinander",
+      "übermäßige Karten- und Boxennutzung",
+      "generische Business-Handshakes oder gestellte Stockfoto-Szenen",
+      "Text oder Logo mit unzureichendem Kontrast zum Hintergrund"
+    ],
+    "cta_policy": {
+      "hero_primary_max": 1,
+      "hero_secondary_max": 1,
+      "secondary_cta_only_when": "Ein klar anderer, relevanter Nutzerweg vorhanden ist",
+      "repeat_ctas": "sparsam und nur nach inhaltlich sinnvollen Abschnitten"
+    },
+    "card_policy": {
+      "default_max_per_row": 3,
+      "use_only_when": "Inhalte wirklich gleichrangig und scanbar sind",
+      "avoid_when": "Ein linearer Text-Bild-Aufbau verständlicher ist"
+    },
+    "asset_policy": {
+      "prefer": [
+        "eigene Unternehmensbilder",
+        "kuratierte branchengerechte Stockbilder",
+        "authentische Arbeits-, Produkt-, Raum- oder Detailaufnahmen"
+      ],
+      "avoid": [
+        "offensichtlich generische KI- oder Stockbilder",
+        "unpassende Schutzkleidung, Werkzeuge oder Arbeitsabläufe",
+        "Bilder ohne Bezug zum konkreten Leistungsversprechen"
+      ]
+    }
+  },
+  "selection_logic": {
+    "scoring_dimensions": [
+      {
+        "key": "desired_effect",
+        "weight": 0.3
+      },
+      {
+        "key": "target_audience",
+        "weight": 0.2
+      },
+      {
+        "key": "positioning_and_offer",
+        "weight": 0.15
+      },
+      {
+        "key": "available_visual_assets",
+        "weight": 0.15
+      },
+      {
+        "key": "corporate_identity",
+        "weight": 0.1
+      },
+      {
+        "key": "content_volume",
+        "weight": 0.1
+      }
+    ],
+    "core_style_rule": "Wähle den Kern-Style mit dem höchsten Gesamtscore, sofern keine eindeutige manuelle Vorgabe existiert.",
+    "special_style_rule": "Spezial-Styles nur bei ausdrücklichem Wunsch oder mindestens drei starken selection_signals und keinem harten Ausschlusskriterium auswählen.",
+    "manual_override": "Eine bewusste Nutzerauswahl hat Vorrang, sofern Lesbarkeit, Barrierearmut und Zielgruppeneignung nicht erheblich beeinträchtigt werden.",
+    "fallback_style_id": "D01"
+  },
+  "styles": [
+    {
+      "id": "D01",
+      "key": "clean_business",
+      "name": "Clean Business",
+      "group": "core",
+      "summary": "Seriös, modern, neutral und vielseitig mit viel Weißraum und klarer Informationshierarchie.",
+      "desired_effects": ["seriös", "modern", "klar", "effizient", "unaufdringlich"],
+      "suitable_for": ["Beratung", "IT", "B2B-Dienstleistungen", "Agenturen", "Kanzleien", "Verwaltung", "branchenübergreifende KMU"],
+      "selection_signals": [
+        "Das Unternehmen möchte professionell und zeitgemäß wirken, ohne stark zu polarisieren.",
+        "Klarheit und schnelle Orientierung sind wichtiger als eine ausgeprägte Stilinszenierung.",
+        "Es gibt nur wenige oder durchschnittliche Bildressourcen.",
+        "Die Zielgruppe ist breit oder überwiegend geschäftlich."
+      ],
+      "avoid_when": [
+        "Die Marke lebt stark von Atmosphäre, Tradition oder bewusster Provokation.",
+        "Eine unverwechselbare visuelle Inszenierung ist das wichtigste Ziel."
+      ],
+      "layout": {
+        "density": "low_to_medium",
+        "grid": "klar, ausgewogen und überwiegend symmetrisch",
+        "spacing": "großzügig",
+        "section_style": "ruhige, klar getrennte Inhaltsbereiche",
+        "corners": "dezent gerundet oder neutral",
+        "decoration": "minimal"
+      },
+      "hero": {
+        "composition": "Text-Bild-Split oder ruhiger Vollbreiten-Hero",
+        "headline": "präzise und nutzenorientiert",
+        "image_role": "unterstützend",
+        "cta_treatment": "klarer primärer CTA, optional dezenter Textlink"
+      },
+      "typography": {
+        "character": "neutrale moderne Sans Serif",
+        "headline_scale": "medium_to_large",
+        "body_style": "sehr gut lesbar und sachlich",
+        "avoid": ["dekorative Display-Schriften", "extreme Größenkontraste"]
+      },
+      "color_usage": {
+        "base": "helle neutrale Flächen",
+        "brand_color": "gezielt als Akzent und für Interaktion",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["hell", "professionell", "authentisch", "ruhig"],
+        "preferred_subjects": ["Menschen bei echter Arbeit", "Arbeitsumgebung", "Leistungsergebnis"],
+        "composition": "klar, mit ausreichend ruhigen Flächen",
+        "avoid": ["überinszenierte Teams", "generische Büroszenen"]
+      },
+      "preferred_components": ["kompakte Leistungsübersicht", "klarer Prozess", "Kontaktbereich", "ausgewählte Referenzen"],
+      "avoid_components": ["Ticker", "bunte Icon-Wände", "dekorative Banner"],
+      "motion": "subtil"
+    },
+    {
+      "id": "D02",
+      "key": "local_personal",
+      "name": "Local & Personal",
+      "group": "core",
+      "summary": "Nahbar, persönlich und lokal verankert mit sichtbaren Menschen und warmer Gestaltung.",
+      "desired_effects": ["nahbar", "sympathisch", "persönlich", "lokal", "vertrauensvoll"],
+      "suitable_for": ["lokale Dienstleistungen", "Praxen", "Studios", "Handwerk", "Gastronomie", "inhabergeführte Betriebe", "personenbezogene Services"],
+      "selection_signals": [
+        "Die Inhabenden oder das Team sind ein wichtiger Teil des Angebots.",
+        "Kundennähe und regionale Verankerung sind zentrale Kaufargumente.",
+        "Es gibt authentische Bilder von Personen, Räumen oder dem Betrieb.",
+        "Die Zielgruppe entscheidet stark über Sympathie und Vertrauen."
+      ],
+      "avoid_when": [
+        "Das Unternehmen möchte bewusst anonym, technisch oder global auftreten.",
+        "Es dürfen keine Personen oder persönlichen Merkmale gezeigt werden."
+      ],
+      "layout": {
+        "density": "medium",
+        "grid": "klar mit leicht organischen Akzenten",
+        "spacing": "komfortabel",
+        "section_style": "abwechselnde Personen-, Leistungs- und Ortsbezüge",
+        "corners": "sanft gerundet",
+        "decoration": "wenige warme oder organische Details"
+      },
+      "hero": {
+        "composition": "Person, Team, Raum oder Betrieb im direkten Bezug zur Kernbotschaft",
+        "headline": "direkt, menschlich und konkret",
+        "image_role": "zentral",
+        "cta_treatment": "freundlich, eindeutig und nicht aggressiv"
+      },
+      "typography": {
+        "character": "freundliche Sans Serif oder warme Serif-Sans-Kombination",
+        "headline_scale": "medium_to_large",
+        "body_style": "offen und gut lesbar",
+        "avoid": ["kalte Tech-Schriften", "zu formelle Typografie"]
+      },
+      "color_usage": {
+        "base": "helle oder warme neutrale Flächen",
+        "brand_color": "sichtbar, aber weich eingesetzt",
+        "contrast": "mittel",
+        "max_prominent_colors": 3
+      },
+      "imagery": {
+        "mood": ["authentisch", "warm", "offen", "regional"],
+        "preferred_subjects": ["Inhabende", "Team", "Kundenkontakt", "Räume", "lokales Umfeld"],
+        "composition": "natürlich und beobachtend statt gestellt",
+        "avoid": ["austauschbare Models", "sterile Freisteller"]
+      },
+      "preferred_components": ["persönliche Vorstellung", "lokaler Bezug", "Bewertungen mit Quelle", "Öffnungszeiten", "Anfahrt und Kontakt"],
+      "avoid_components": ["anonyme Icon-Kommunikation", "übermäßig technische Diagramme"],
+      "motion": "weich und zurückhaltend"
+    },
+    {
+      "id": "D03",
+      "key": "technical_precision",
+      "name": "Technical Precision",
+      "group": "core",
+      "summary": "Präzise, leistungsfähig und strukturiert mit klaren Rastern, technischen Details und höherem Kontrast.",
+      "desired_effects": ["präzise", "kompetent", "technisch", "leistungsfähig", "verlässlich"],
+      "suitable_for": ["Industrie", "Technik", "IT", "Bau", "Automotive", "Ingenieurwesen", "Produktion", "technische Services"],
+      "selection_signals": [
+        "Technische Kompetenz oder Prozesssicherheit ist ein zentrales Verkaufsargument.",
+        "Leistungen lassen sich über Verfahren, Maschinen, Systeme oder Spezifikationen erklären.",
+        "Die Zielgruppe bewertet Präzision und Zuverlässigkeit stärker als Emotionalität.",
+        "Es gibt Detailbilder von Technik, Produktion oder Prozessen."
+      ],
+      "avoid_when": [
+        "Die Leistung ist stark emotional, persönlich oder atmosphärisch.",
+        "Die Marke soll bewusst weich, verspielt oder nostalgisch wirken."
+      ],
+      "layout": {
+        "density": "medium",
+        "grid": "streng und modular",
+        "spacing": "präzise und konsistent",
+        "section_style": "klar gerasterte Leistungs- und Kompetenzbereiche",
+        "corners": "kantig oder nur leicht gerundet",
+        "decoration": "dezente Linien, Raster oder technische Markierungen"
+      },
+      "hero": {
+        "composition": "Kernleistung mit Technik-, Prozess- oder Produktmotiv",
+        "headline": "kurz, konkret und leistungsbezogen",
+        "image_role": "beweisend und erklärend",
+        "cta_treatment": "kontrastreich und funktional"
+      },
+      "typography": {
+        "character": "präzise geometrische oder groteske Sans Serif",
+        "headline_scale": "large",
+        "body_style": "kompakt und hoch lesbar",
+        "avoid": ["verspielte Serifen", "handgeschriebene Akzente"]
+      },
+      "color_usage": {
+        "base": "helle oder dunkle technische Neutraltöne",
+        "brand_color": "deutlich in Navigations- und Funktionsflächen",
+        "contrast": "high",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["präzise", "detailreich", "professionell", "kontrolliert"],
+        "preferred_subjects": ["Maschinen", "Technikdetails", "Prozesse", "Materialien", "Arbeitsumgebung"],
+        "composition": "klare Linien, Nahaufnahmen und strukturierte Perspektiven",
+        "avoid": ["abstrakte Tech-Klischees", "unnötige futuristische Effekte"]
+      },
+      "preferred_components": ["Leistungsraster", "Prozessschritte", "Zertifikate", "technische Kennwerte", "Referenzprojekte"],
+      "avoid_components": ["verspielte Testimonials", "organische Dekoformen"],
+      "motion": "präzise, kurz und funktional"
+    },
+    {
+      "id": "D04",
+      "key": "premium_editorial",
+      "name": "Premium Editorial",
+      "group": "core",
+      "summary": "Hochwertig, exklusiv und reduziert; inszeniert wenige starke Inhalte mit großzügiger Typografie und Bildwirkung.",
+      "desired_effects": ["hochwertig", "exklusiv", "ruhig", "ästhetisch", "souverän"],
+      "suitable_for": ["Architektur", "Interior", "Beauty", "hochwertige Dienstleistungen", "Premium-Produkte", "Design", "Boutique-Angebote"],
+      "selection_signals": [
+        "Das Angebot wird über Qualität, Ästhetik oder Exklusivität positioniert.",
+        "Es gibt wenige, aber sehr hochwertige Bilder.",
+        "Die Inhalte können stark verdichtet werden.",
+        "Ein höheres Preisniveau soll visuell plausibel werden."
+      ],
+      "avoid_when": [
+        "Viele gleichrangige Leistungen oder technische Details müssen sofort sichtbar sein.",
+        "Es fehlen hochwertige Bilder und eine klare visuelle Identität."
+      ],
+      "layout": {
+        "density": "very_low",
+        "grid": "großzügig, optional asymmetrisch",
+        "spacing": "sehr großzügig",
+        "section_style": "wenige großformatige Abschnitte",
+        "corners": "minimal oder neutral",
+        "decoration": "nahezu keine"
+      },
+      "hero": {
+        "composition": "großes Leitbild oder elegante Text-Bild-Komposition",
+        "headline": "kurz, hochwertig und selbstbewusst",
+        "image_role": "dominant",
+        "cta_treatment": "zurückhaltend und hochwertig"
+      },
+      "typography": {
+        "character": "elegante Serif-Sans-Kombination oder hochwertige Sans Serif",
+        "headline_scale": "very_large",
+        "body_style": "luftig und reduziert",
+        "avoid": ["kompakte Textblöcke", "zu viele Schriftschnitte"]
+      },
+      "color_usage": {
+        "base": "helle Naturtöne oder tiefe dunkle Flächen",
+        "brand_color": "sehr kontrolliert und sparsam",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["hochwertig", "ruhig", "komponiert", "detailorientiert"],
+        "preferred_subjects": ["Produkte", "Räume", "Materialdetails", "Ergebnisse", "kuratierte Porträts"],
+        "composition": "großformatig mit klarer Bildsprache",
+        "avoid": ["mittelmäßige Stockbilder", "Bildcollagen", "zu viele kleine Bilder"]
+      },
+      "preferred_components": ["großformatige Referenzen", "kuratierte Leistungsdarstellung", "Markenstatement", "reduzierter Kontakt-CTA"],
+      "avoid_components": ["dichte Kartenraster", "Badge-Sammlungen", "laute Aktionsflächen"],
+      "motion": "langsam, subtil und hochwertig"
+    },
+    {
+      "id": "D05",
+      "key": "bold_modern",
+      "name": "Bold Modern",
+      "group": "core",
+      "summary": "Jung, progressiv und selbstbewusst mit großen Headlines, starken Akzenten und dynamischer Komposition.",
+      "desired_effects": ["progressiv", "selbstbewusst", "jung", "dynamisch", "innovativ"],
+      "suitable_for": ["Start-ups", "Digitalunternehmen", "Fitness", "moderne Agenturen", "innovative KMU", "junge Dienstleistungsmarken"],
+      "selection_signals": [
+        "Das Unternehmen will Veränderung, Tempo oder Innovation vermitteln.",
+        "Die Marke verfügt über eine starke Akzentfarbe oder markante Sprache.",
+        "Die Zielgruppe akzeptiert eine expressive Gestaltung.",
+        "Differenzierung ist wichtiger als konservative Zurückhaltung."
+      ],
+      "avoid_when": [
+        "Die Zielgruppe erwartet hohe formale Zurückhaltung.",
+        "Die Marke hat keine klare Botschaft oder visuelle Richtung."
+      ],
+      "layout": {
+        "density": "medium",
+        "grid": "dynamisch, aber kontrolliert",
+        "spacing": "großzügig mit bewussten Brüchen",
+        "section_style": "abwechselnd großformatig und kompakt",
+        "corners": "variabel, eher klar",
+        "decoration": "starke Typografie und wenige grafische Akzente"
+      },
+      "hero": {
+        "composition": "dominante Headline mit Bild, Farbfläche oder ungewöhnlichem Zuschnitt",
+        "headline": "groß, direkt und positionierend",
+        "image_role": "gleichwertig oder sekundär zur Typografie",
+        "cta_treatment": "deutlich, aber nicht mehrfach wiederholt"
+      },
+      "typography": {
+        "character": "markante moderne Sans Serif",
+        "headline_scale": "very_large",
+        "body_style": "knapp und klar",
+        "avoid": ["klassische Kanzlei-Typografie", "zu viele Textstufen"]
+      },
+      "color_usage": {
+        "base": "klare neutrale oder kontrastreiche Flächen",
+        "brand_color": "großzügiger und mutiger einsetzbar",
+        "contrast": "high",
+        "max_prominent_colors": 3
+      },
+      "imagery": {
+        "mood": ["dynamisch", "kontrastreich", "zeitgemäß", "eigenständig"],
+        "preferred_subjects": ["Menschen in Aktion", "starke Produkte", "ungewöhnliche Perspektiven", "markante Details"],
+        "composition": "bewusst angeschnitten oder spannungsvoll",
+        "avoid": ["konservative Gruppenfotos", "austauschbare Motive"]
+      },
+      "preferred_components": ["Statement-Bereiche", "knappe Leistungsblöcke", "starke Cases", "visuelle Zahlen mit Aussage"],
+      "avoid_components": ["viele kleine Icons", "klassische Schattenkarten", "übermäßige Animationen"],
+      "motion": "dynamisch, aber kurz und kontrolliert"
+    },
+    {
+      "id": "D06",
+      "key": "product_showcase",
+      "name": "Product Showcase",
+      "group": "core",
+      "summary": "Produkt- und ergebnisorientiert mit großen Motiven, klaren Vorteilen und reduzierter Ablenkung.",
+      "desired_effects": ["greifbar", "produktorientiert", "hochwertig", "klar", "überzeugend"],
+      "suitable_for": ["Handel", "Produktion", "Lebensmittel", "Möbel", "Hersteller", "Manufakturen", "produktnahe Services"],
+      "selection_signals": [
+        "Produkte oder sichtbare Arbeitsergebnisse sind das stärkste Verkaufsargument.",
+        "Es gibt gute Produkt-, Detail- oder Anwendungsbilder.",
+        "Der Nutzen lässt sich in wenigen klaren Vorteilen ausdrücken.",
+        "Die Website soll keine vollständige Shop-Funktion ersetzen."
+      ],
+      "avoid_when": [
+        "Das Angebot ist abstrakt und nicht visuell darstellbar.",
+        "Es gibt weder eigene noch geeignete kuratierte Produktbilder."
+      ],
+      "layout": {
+        "density": "low_to_medium",
+        "grid": "bildgeführt und klar",
+        "spacing": "großzügig",
+        "section_style": "Produkt, Vorteil und Anwendung im Wechsel",
+        "corners": "an Marke und Produkt angepasst",
+        "decoration": "minimal"
+      },
+      "hero": {
+        "composition": "Produkt oder Ergebnis als dominantes Motiv",
+        "headline": "konkreter Produktnutzen",
+        "image_role": "dominant",
+        "cta_treatment": "klarer Anfrage-, Beratungs- oder Sortiment-CTA"
+      },
+      "typography": {
+        "character": "klare Sans Serif, optional charakterstarke Headline-Schrift",
+        "headline_scale": "large",
+        "body_style": "kurz und nutzenorientiert",
+        "avoid": ["zu redaktionelle Langtexte", "dekorative Lesetexte"]
+      },
+      "color_usage": {
+        "base": "neutral, damit Produkte wirken",
+        "brand_color": "für Orientierung und CTA",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["greifbar", "detailreich", "hochwertig", "anwendungsnah"],
+        "preferred_subjects": ["Produkte", "Materialien", "Anwendung", "Herstellung", "Vorher-Nachher-Ergebnis"],
+        "composition": "groß, scharf und mit eindeutiger Blickführung",
+        "avoid": ["kleine Bildergalerien ohne Hierarchie", "unpassende Lifestyle-Motive"]
+      },
+      "preferred_components": ["Produkt-Highlights", "Vorteilsdarstellung", "Material- oder Qualitätsmerkmale", "Anwendungsbeispiele", "Anfrage-CTA"],
+      "avoid_components": ["dichte Feature-Tabellen ohne Bedarf", "shopähnliche Elemente ohne Funktion"],
+      "motion": "subtil produktfokussiert"
+    },
+    {
+      "id": "D07",
+      "key": "trust_expertise",
+      "name": "Trust & Expertise",
+      "group": "core",
+      "summary": "Kompetent, sicher und etabliert mit nachvollziehbaren Belegen, ruhiger Gestaltung und sichtbarer Expertise.",
+      "desired_effects": ["vertrauenswürdig", "kompetent", "sicher", "etabliert", "verantwortungsvoll"],
+      "suitable_for": ["Steuerberatung", "Recht", "Finanzen", "Gesundheit", "Unternehmensberatung", "sensible Dienstleistungen", "regulierte Bereiche"],
+      "selection_signals": [
+        "Die Entscheidung erfordert hohes Vertrauen oder betrifft sensible Themen.",
+        "Qualifikationen, Erfahrung oder verifizierbare Referenzen sind zentral.",
+        "Die Zielgruppe erwartet Sachlichkeit und Verlässlichkeit.",
+        "Personen und Expertise sollen sichtbar werden, ohne werblich zu wirken."
+      ],
+      "avoid_when": [
+        "Die Marke will bewusst rebellisch, verspielt oder stark lifestyleorientiert wirken.",
+        "Es gibt keinerlei belastbare Vertrauensbelege."
+      ],
+      "layout": {
+        "density": "medium",
+        "grid": "stabil, ausgewogen und vorhersehbar",
+        "spacing": "komfortabel",
+        "section_style": "Problem, Expertise, Vorgehen und Kontakt logisch aufgebaut",
+        "corners": "dezent",
+        "decoration": "sehr zurückhaltend"
+      },
+      "hero": {
+        "composition": "klare Aussage mit Person, Team oder seriösem Leistungsmotiv",
+        "headline": "sachlich, konkret und vertrauensbildend",
+        "image_role": "unterstützend und authentifizierend",
+        "cta_treatment": "seriös und niedrigschwellig"
+      },
+      "typography": {
+        "character": "ruhige Sans Serif oder seriöse Serif-Sans-Kombination",
+        "headline_scale": "medium_to_large",
+        "body_style": "sehr gut lesbar mit kontrollierter Zeilenlänge",
+        "avoid": ["experimentelle Display-Schriften", "übermäßig große Headlines"]
+      },
+      "color_usage": {
+        "base": "ruhige helle oder gedeckte Flächen",
+        "brand_color": "kontrolliert und konsistent",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["seriös", "menschlich", "ruhig", "glaubwürdig"],
+        "preferred_subjects": ["Expertinnen und Experten", "Beratungssituation", "Praxis oder Büro", "reale Arbeit"],
+        "composition": "natürlich, klar und nicht werblich überzogen",
+        "avoid": ["Handshake-Klischees", "nicht belegbare Erfolgsinszenierung"]
+      },
+      "preferred_components": ["Qualifikationen", "nachvollziehbarer Prozess", "FAQ", "verifizierte Bewertungen", "Ansprechpersonen", "diskreter Kontakt"],
+      "avoid_components": ["künstliche Countdown-Elemente", "laute Verkaufsbanner", "unbelegte Superlative"],
+      "motion": "minimal"
+    },
+    {
+      "id": "D08",
+      "key": "lifestyle_emotion",
+      "name": "Lifestyle & Emotion",
+      "group": "core",
+      "summary": "Emotional, ästhetisch und einladend mit atmosphärischer Fotografie und erlebnisorientierter Gestaltung.",
+      "desired_effects": ["emotional", "einladend", "ästhetisch", "lebendig", "inspirierend"],
+      "suitable_for": ["Gastronomie", "Hotellerie", "Beauty", "Wellness", "Fashion", "Freizeit", "Events", "erlebnisorientierte Angebote"],
+      "selection_signals": [
+        "Atmosphäre und Erlebnis beeinflussen die Kaufentscheidung stark.",
+        "Es gibt emotionale Bilder von Räumen, Menschen, Produkten oder Situationen.",
+        "Die Zielgruppe soll sich in eine gewünschte Erfahrung hineinversetzen.",
+        "Die Marke darf warm, sinnlich oder lebendig auftreten."
+      ],
+      "avoid_when": [
+        "Die Leistung wird primär über technische Spezifikationen verkauft.",
+        "Die vorhandenen Bilder vermitteln keine konsistente Atmosphäre."
+      ],
+      "layout": {
+        "density": "low_to_medium",
+        "grid": "bildbetont und fließend",
+        "spacing": "großzügig",
+        "section_style": "atmosphärischer Wechsel aus Bild, kurzem Text und Angebot",
+        "corners": "weich oder markenabhängig",
+        "decoration": "dezente atmosphärische Details"
+      },
+      "hero": {
+        "composition": "emotionales Vollbreitenmotiv oder immersive Text-Bild-Komposition",
+        "headline": "kurz, einladend und erlebnisorientiert",
+        "image_role": "dominant",
+        "cta_treatment": "klar, aber visuell integriert"
+      },
+      "typography": {
+        "character": "ästhetische Sans Serif oder ausdrucksstarke Serif-Sans-Kombination",
+        "headline_scale": "large_to_very_large",
+        "body_style": "leicht und luftig",
+        "avoid": ["technische Monospace-Anmutung", "dichte Sachtexte"]
+      },
+      "color_usage": {
+        "base": "atmosphärisch aus Bildwelt und Marke abgeleitet",
+        "brand_color": "emotional, aber kontrolliert",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 3
+      },
+      "imagery": {
+        "mood": ["atmosphärisch", "sinnlich", "lebendig", "einladend"],
+        "preferred_subjects": ["Erlebnisse", "Räume", "Menschen", "Produkte im Kontext", "Details"],
+        "composition": "immersiv und hochwertig",
+        "avoid": ["generische Spa-Symbole", "offensichtliche Stockfoto-Klischees"]
+      },
+      "preferred_components": ["Erlebnis-Highlights", "Galerie mit klarer Auswahl", "Angebote", "Öffnungszeiten", "Reservierungs- oder Buchungs-CTA"],
+      "avoid_components": ["technische Datenraster", "zu viele sachliche Boxen"],
+      "motion": "weich, atmosphärisch und reduziert"
+    },
+    {
+      "id": "D09",
+      "key": "rustic_handmade",
+      "name": "Urig & Handgemacht",
+      "group": "special",
+      "summary": "Bodenständig, ehrlich und handgemacht mit natürlichen Materialien, warmen Farben und greifbarer Authentizität.",
+      "desired_effects": ["urig", "ehrlich", "traditionell", "handgemacht", "regional", "bodenständig"],
+      "suitable_for": ["Manufakturen", "Hofläden", "Bäckereien", "Gärtnereien", "Landgastronomie", "Traditionshandwerk", "regionale Familienbetriebe"],
+      "selection_signals": [
+        "Herstellung, Material, Herkunft oder Handarbeit sind Kern der Marke.",
+        "Der Betrieb ist stark regional oder familiär verwurzelt.",
+        "Es gibt authentische Bilder von Arbeit, Materialien, Produkten oder Räumen.",
+        "Eine leicht unperfekte, greifbare Ästhetik passt zur Positionierung."
+      ],
+      "avoid_when": [
+        "Die Marke will steril, futuristisch oder stark digital wirken.",
+        "Traditionssignale wären inhaltlich künstlich oder unbelegt.",
+        "Die Zielgruppe erwartet formale High-End-Minimalistik."
+      ],
+      "special_style_gate": {
+        "requires_explicit_opt_in_or_signal_count": 3,
+        "requires_quality_images": true,
+        "risk": "Kann ohne Disziplin altbacken, folkloristisch oder überdekoriert wirken."
+      },
+      "layout": {
+        "density": "low_to_medium",
+        "grid": "einfach, solide und leicht organisch",
+        "spacing": "großzügig, aber nicht luxuriös",
+        "section_style": "Material, Herstellung, Menschen und Ergebnis im Wechsel",
+        "corners": "leicht gerundet oder handwerklich kantig",
+        "decoration": "sparsame Texturen oder Linien mit Materialbezug"
+      },
+      "hero": {
+        "composition": "authentische Arbeitssituation, Produkt oder Materialdetail",
+        "headline": "ehrlich, konkret und bodenständig",
+        "image_role": "zentral",
+        "cta_treatment": "direkt und ungekünstelt"
+      },
+      "typography": {
+        "character": "warme markante Serif oder robuste Sans Serif mit gut lesbarer Begleitschrift",
+        "headline_scale": "large",
+        "body_style": "ruhig und gut lesbar",
+        "avoid": ["Western-Klischees", "mehrere dekorative Schriften", "Pseudo-Handschrift im Fließtext"]
+      },
+      "color_usage": {
+        "base": "warme Natur- und Materialtöne",
+        "brand_color": "mit gedeckten Tönen harmonisieren",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 3
+      },
+      "imagery": {
+        "mood": ["authentisch", "warm", "greifbar", "handgemacht"],
+        "preferred_subjects": ["Hände bei der Arbeit", "Materialien", "Produkte", "Werkstatt", "Herkunft", "Menschen"],
+        "composition": "nah, taktil und natürlich beleuchtet",
+        "avoid": ["Vintage-Filter über allen Bildern", "künstliche Nostalgie", "generische Landschaft ohne Leistungsbezug"]
+      },
+      "preferred_components": ["Herkunft und Geschichte", "Herstellungsprozess", "Materialien", "Personen", "Produkte oder Ergebnisse"],
+      "avoid_components": ["Papiertexturen in großer Menge", "Holzoptik als UI-Dekor", "Siegel ohne Bedeutung"],
+      "motion": "minimal und natürlich"
+    },
+    {
+      "id": "D10",
+      "key": "brutalist_raw",
+      "name": "Brutalist / Raw",
+      "group": "special",
+      "summary": "Roh, direkt und provokant mit harter Typografie, starken Kontrasten und bewusst unkonventioneller Gestaltung.",
+      "desired_effects": ["roh", "direkt", "mutig", "provokant", "unkonventionell", "urban"],
+      "suitable_for": ["Kreativstudios", "urbane Gastronomie", "Streetfood", "alternative Läden", "junge Marken", "Kultur", "mutige Subbrands"],
+      "selection_signals": [
+        "Die Marke will bewusst polarisieren und Konventionen brechen.",
+        "Die Zielgruppe ist designaffin oder subkulturell geprägt.",
+        "Sprache und Markenidentität sind bereits klar und direkt.",
+        "Hohe Wiedererkennbarkeit ist wichtiger als universelle Gefälligkeit."
+      ],
+      "avoid_when": [
+        "Die Zielgruppe ist konservativ oder sicherheitsorientiert.",
+        "Barrierearme Lesbarkeit lässt sich mit der gewünschten Inszenierung nicht sicherstellen.",
+        "Die Marke hat keine klare Haltung oder nur generische Inhalte.",
+        "Vertrauen muss vor allem über Ruhe und formale Seriosität entstehen."
+      ],
+      "special_style_gate": {
+        "requires_explicit_opt_in_or_signal_count": 3,
+        "requires_quality_images": false,
+        "risk": "Kann unfertig, aggressiv oder unseriös wirken und ist der nischigste Style im Katalog."
+      },
+      "layout": {
+        "density": "medium_to_high",
+        "grid": "hart, modular und bewusst sichtbar",
+        "spacing": "kontrastierend zwischen eng und sehr groß",
+        "section_style": "große Blöcke, harte Trennungen und bewusste Rasterbrüche",
+        "corners": "square",
+        "decoration": "Typografie, Rahmen und Linien statt Schmuck"
+      },
+      "hero": {
+        "composition": "dominante Typografie, harte Farbfläche oder kontrastreiches Motiv",
+        "headline": "extrem direkt und sehr groß",
+        "image_role": "optional oder bewusst roh eingesetzt",
+        "cta_treatment": "kantig, eindeutig und hoch kontrastiert"
+      },
+      "typography": {
+        "character": "fette Grotesk, Condensed oder kontrollierte Monospace-Akzente",
+        "headline_scale": "extreme",
+        "body_style": "einfach und robust lesbar",
+        "avoid": ["zu viele Schriftfamilien", "absichtlich schlechte Lesbarkeit", "lange Versaltexte"]
+      },
+      "color_usage": {
+        "base": "Schwarz, Weiß oder harte neutrale Flächen",
+        "brand_color": "eine dominante harte Akzentfarbe",
+        "contrast": "very_high",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["kontrastreich", "direkt", "urban", "ungeglättet"],
+        "preferred_subjects": ["markante Details", "Räume", "Produkte", "Menschen mit Haltung", "Texturen"],
+        "composition": "hart beschnitten, direkt oder dokumentarisch",
+        "avoid": ["glatte Corporate-Fotografie", "dekorative Bildmasken", "zufälliges Chaos"]
+      },
+      "preferred_components": ["Statement-Hero", "harte Leistungsblöcke", "direkte Projektbeispiele", "markanter Kontaktbereich"],
+      "avoid_components": ["weiche Karten", "Glasmorphismus", "Pastellverläufe", "verspielte Icons"],
+      "motion": "kurz, hart und sparsam"
+    },
+    {
+      "id": "D11",
+      "key": "retro_heritage",
+      "name": "Retro / Heritage",
+      "group": "special",
+      "summary": "Nostalgisch, charakterstark und traditionsbewusst mit kontrollierten historischen Anklängen und moderner Bedienbarkeit.",
+      "desired_effects": ["nostalgisch", "charakterstark", "traditionsbewusst", "warm", "wiedererkennbar"],
+      "suitable_for": ["Cafés", "Barbershops", "Oldtimer und Kfz", "Feinkost", "Genussmarken", "Traditionsbetriebe", "Concept Stores"],
+      "selection_signals": [
+        "Die Unternehmensgeschichte oder eine klar definierte Epoche gehört zur Marke.",
+        "Produkte, Räume oder Logo tragen bereits einen Heritage-Charakter.",
+        "Nostalgie unterstützt das Angebot glaubwürdig.",
+        "Die Zielgruppe schätzt Markeninszenierung und Atmosphäre."
+      ],
+      "avoid_when": [
+        "Retro wäre nur Dekoration ohne Bezug zur Marke.",
+        "Das Unternehmen positioniert sich primär über Zukunftstechnologie.",
+        "Die vorhandene Corporate Identity ist klar minimalistisch und futuristisch."
+      ],
+      "special_style_gate": {
+        "requires_explicit_opt_in_or_signal_count": 3,
+        "requires_quality_images": true,
+        "risk": "Kann schnell kitschig, themenparkartig oder visuell überladen werden."
+      },
+      "layout": {
+        "density": "medium",
+        "grid": "klassisch und geordnet",
+        "spacing": "komfortabel",
+        "section_style": "klare Inhalte mit wenigen historischen Akzenten",
+        "corners": "markenabhängig, eher klassisch",
+        "decoration": "sparsame Rahmen, Linien, Badges oder Ornamente"
+      },
+      "hero": {
+        "composition": "atmosphärisches Produkt-, Raum- oder Markenmotiv",
+        "headline": "charaktervoll und knapp",
+        "image_role": "zentral",
+        "cta_treatment": "klassisch, klar und modern bedienbar"
+      },
+      "typography": {
+        "character": "charaktervolle Display- oder Serifenschrift für Headlines plus neutrale Leseschrift",
+        "headline_scale": "large",
+        "body_style": "modern und uneingeschränkt lesbar",
+        "avoid": ["mehrere Vintage-Schriften", "dekorative Schrift im Fließtext", "schwer lesbare Script-Fonts"]
+      },
+      "color_usage": {
+        "base": "Creme oder gedeckte neutrale Flächen",
+        "brand_color": "charaktervoll, häufig Dunkelrot, Petrol, Dunkelgrün oder Navy, aber CI hat Vorrang",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 3
+      },
+      "imagery": {
+        "mood": ["atmosphärisch", "warm", "zeitlos", "charaktervoll"],
+        "preferred_subjects": ["Produkte", "Räume", "historische Details", "Herstellung", "Markenelemente"],
+        "composition": "erzählerisch, detailreich und kontrolliert",
+        "avoid": ["künstliches Filmkorn auf allem", "beliebige historische Bilder", "Retro-Requisiten ohne Bezug"]
+      },
+      "preferred_components": ["Unternehmensgeschichte", "Produkte", "Räume", "Meilensteine in reduzierter Form", "Kontakt oder Reservierung"],
+      "avoid_components": ["Ornament-Überladung", "Siegel-Sammlungen", "pseudo-historische UI-Bedienelemente"],
+      "motion": "subtil und klassisch"
+    },
+    {
+      "id": "D12",
+      "key": "magazine_storytelling",
+      "name": "Magazin / Editorial Storytelling",
+      "group": "special",
+      "summary": "Erzählerisch, redaktionell und inhaltsstark; verbindet starke Typografie, Projekte und Markenstory zu einer Magazin-Anmutung.",
+      "desired_effects": ["erzählerisch", "redaktionell", "kultiviert", "inhaltlich", "eigenständig"],
+      "suitable_for": ["Architektur", "Interior", "Kultur", "Design", "projektorientierte Unternehmen", "hochwertige Beratung", "Marken mit starker Geschichte"],
+      "selection_signals": [
+        "Das Unternehmen verfügt über gute Projekte, Geschichten oder Einblicke.",
+        "Inhalte und Haltung sollen ebenso wichtig sein wie Leistungen.",
+        "Es gibt ausreichend hochwertige Bilder und substanziellen Text.",
+        "Die Zielgruppe nimmt sich Zeit für Inspiration und Vertiefung."
+      ],
+      "avoid_when": [
+        "Die Website soll ausschließlich als sehr knappe Kontakt-Visitenkarte dienen.",
+        "Es gibt weder hochwertige Bilder noch erzählenswerte Inhalte.",
+        "Die Zielgruppe benötigt vor allem eine extrem schnelle technische Übersicht."
+      ],
+      "special_style_gate": {
+        "requires_explicit_opt_in_or_signal_count": 3,
+        "requires_quality_images": true,
+        "risk": "Kann ohne klare Redaktion textlastig, unübersichtlich oder künstlich anspruchsvoll wirken."
+      },
+      "layout": {
+        "density": "medium",
+        "grid": "editorial, rhythmisch und optional asymmetrisch",
+        "spacing": "großzügig mit bewusster Dramaturgie",
+        "section_style": "wechselnde Bildgrößen, Essays, Zitate und Projektabschnitte",
+        "corners": "neutral",
+        "decoration": "typografische Details, Linien und Bildunterschriften"
+      },
+      "hero": {
+        "composition": "Titelstory-Anmutung mit starkem Bild und prägnanter Headline",
+        "headline": "redaktionell, neugierig machend und positionierend",
+        "image_role": "dominant oder gleichwertig zur Typografie",
+        "cta_treatment": "zurückhaltend, häufig als Textlink oder klarer Einzelbutton"
+      },
+      "typography": {
+        "character": "starke Editorial-Kombination aus Serif und Sans Serif",
+        "headline_scale": "very_large",
+        "body_style": "lesefreundlich mit klarer Zeilenlänge und Zwischenüberschriften",
+        "avoid": ["gleichförmige Textwände", "zu viele typografische Stile"]
+      },
+      "color_usage": {
+        "base": "elegante neutrale Flächen",
+        "brand_color": "sparsam für Orientierung und markante Akzente",
+        "contrast": "mittel bis hoch",
+        "max_prominent_colors": 2
+      },
+      "imagery": {
+        "mood": ["hochwertig", "dokumentarisch", "kultiviert", "erzählerisch"],
+        "preferred_subjects": ["Projekte", "Räume", "Menschen", "Prozesse", "Details", "Kontext"],
+        "composition": "abwechslungsreich, redaktionell und mit klarer Bildhierarchie",
+        "avoid": ["beliebige Stockbilder", "Galerien ohne Geschichte", "zu viele gleich große Bilder"]
+      },
+      "preferred_components": ["Projektstory", "Fallstudie", "Unternehmensgeschichte", "Zitat", "Bildunterschrift", "kuratierte Leistungen"],
+      "avoid_components": ["standardisierte Kartenwände", "Trustbar", "beliebige Icon-Sektionen"],
+      "motion": "subtil und dramaturgisch"
+    }
+  ],
+  "next_catalog_dependencies": {
+    "typography_catalog": "Ordnet jedem Style mehrere konkrete, lizenzierbare Font-Sets zu.",
+    "image_profile_catalog": "Verbindet Branche, Angebot, Motiv, Stimmung und Bildkomposition.",
+    "palette_rules": "Erzeugt aus der Corporate Identity eine zugängliche Palette und regelt ihre Anwendung je Style.",
+    "component_catalog": "Definiert wiederverwendbare Hero-, Leistungs-, Referenz-, Team- und Kontaktvarianten."
+  }
+}
