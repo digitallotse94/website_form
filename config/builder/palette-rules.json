@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "sme-website-palette-rules",
+  "principle": "Die Corporate Identity liefert die Ausgangsfarbe; der Designstil bestimmt deren Anwendung. Branchenpaletten sind nur Fallbacks.",
+  "input_priority": [
+    "vom Unternehmen bestätigte CI-Farben",
+    "Farben aus bereitgestelltem Logo oder bestehender Website",
+    "manuell gewählte Markenstimmung",
+    "neutraler Fallback passend zum Designstil"
+  ],
+  "output_tokens": [
+    "brand_primary", "brand_primary_hover", "brand_secondary", "accent",
+    "background", "background_alt", "surface", "surface_strong",
+    "text", "text_muted", "border", "focus", "on_primary", "on_accent"
+  ],
+  "generation_rules": {
+    "brand_primary": "Übernommene oder aus dem Logo bestimmte Hauptfarbe. Bei geringer Lesbarkeit nur für Flächen oder grafische Akzente verwenden.",
+    "brand_primary_hover": "Primärfarbe visuell um etwa 8 bis 12 Prozent abdunkeln oder aufhellen, abhängig vom Ausgangskontrast.",
+    "brand_secondary": "Nur aus realer CI übernehmen; sonst aus einer nahen Tonwertvariation ableiten, keine zufällige zweite Markenfarbe erfinden.",
+    "accent": "Komplementär oder analog nur dann erzeugen, wenn der Designstil einen zweiten Akzent benötigt. Sonst brand_primary wiederverwenden.",
+    "background": "Nahe Weiß oder kontrolliert dunkel, passend zum Style; niemals exakt Markenfarbe ohne Kontrastprüfung.",
+    "background_alt": "Leichte Tonwertabweichung zum Hintergrund, nicht als auffälliger Banner verwenden.",
+    "text": "Nahe Schwarz auf hellen Flächen oder nahe Weiß auf dunklen Flächen; keine reine Markenfarbe für längeren Fließtext.",
+    "border": "Subtiler Ton mit klarer Sichtbarkeit bei Inputs und interaktiven Elementen.",
+    "focus": "Deutlich sichtbarer Fokusindikator, der auf allen relevanten Flächen funktioniert."
+  },
+  "accessibility": {
+    "standard": "WCAG 2.2 AA",
+    "normal_text_min_contrast": 4.5,
+    "large_text_min_contrast": 3.0,
+    "ui_component_min_contrast": 3.0,
+    "large_text_definition": "mindestens 24px normal oder 18.66px fett",
+    "rules": [
+      "Jede Text-Hintergrund-Kombination vor Ausgabe prüfen.",
+      "Wenn on_primary nicht besteht, zwischen nahezu Schwarz und nahezu Weiß wählen.",
+      "Information nie ausschließlich über Farbe vermitteln.",
+      "Logo-Kontrast separat prüfen; bei Bedarf neutrale Schutzfläche oder alternative Logoversion verwenden.",
+      "Keine Transparenz verwenden, wenn dadurch der Kontrast vom Hintergrundbild abhängt."
+    ]
+  },
+  "style_application": {
+    "D01": {"background_mode": "light", "brand_coverage": "low", "accent_count": 1, "notes": "95 Prozent helle oder neutrale Flächen; Farbe primär für CTA, Links und kleine Akzente."},
+    "D02": {"background_mode": "light_warm", "brand_coverage": "low_to_medium", "accent_count": 1, "notes": "Warme Neutraltöne und sanfte Farbflächen; keine Bonbonpalette."},
+    "D03": {"background_mode": "light_or_dark", "brand_coverage": "medium", "accent_count": 1, "notes": "Hoher Kontrast, klare Funktionsfarben und kontrollierte technische Flächen."},
+    "D04": {"background_mode": "light_or_deep_dark", "brand_coverage": "low", "accent_count": 1, "notes": "Reduzierte Palette; eine Markenfarbe sparsam und hochwertig einsetzen."},
+    "D05": {"background_mode": "contrast", "brand_coverage": "medium_to_high", "accent_count": 1, "notes": "Eine starke Akzentfarbe darf großflächig wirken; keine konkurrierenden Signalfarben."},
+    "D06": {"background_mode": "neutral", "brand_coverage": "low", "accent_count": 1, "notes": "Hintergründe zurücknehmen, damit Produkte und Ergebnisse dominieren."},
+    "D07": {"background_mode": "light_calm", "brand_coverage": "low_to_medium", "accent_count": 1, "notes": "Gedeckte, seriöse Anwendung; Warn- oder Signalfarben vermeiden."},
+    "D08": {"background_mode": "image_derived", "brand_coverage": "medium", "accent_count": 2, "notes": "Farben aus konsistenter Bildwelt ableiten; emotionale, aber kontrollierte Palette."},
+    "D09": {"background_mode": "warm_natural", "brand_coverage": "medium", "accent_count": 2, "notes": "Natur- und Materialtöne; keine simulierten Holzflächen als UI-Hintergrund."},
+    "D10": {"background_mode": "black_white", "brand_coverage": "high_accent", "accent_count": 1, "notes": "Schwarz, Weiß und genau eine harte Akzentfarbe; maximaler Kontrast."},
+    "D11": {"background_mode": "cream_or_deep", "brand_coverage": "medium", "accent_count": 2, "notes": "Gedeckte Heritage-Töne; Gold nur als Farbe, nicht als Glanz- oder Metallverlauf."},
+    "D12": {"background_mode": "editorial_neutral", "brand_coverage": "low", "accent_count": 1, "notes": "Neutrale Flächen und typografische Hierarchie; Farbe unterstützt Navigation statt Dekoration."}
+  },
+  "neutral_presets": {
+    "cool_light": {"background": "#F7F8FA", "background_alt": "#EEF1F4", "surface": "#FFFFFF", "text": "#17191C", "text_muted": "#5C6470", "border": "#D8DDE3"},
+    "warm_light": {"background": "#FAF8F4", "background_alt": "#F1ECE4", "surface": "#FFFFFF", "text": "#211F1B", "text_muted": "#6D665C", "border": "#DED7CC"},
+    "editorial_light": {"background": "#F7F5F0", "background_alt": "#ECE8E0", "surface": "#FCFBF8", "text": "#1C1B19", "text_muted": "#625E57", "border": "#D6D0C7"},
+    "technical_dark": {"background": "#111418", "background_alt": "#1A1F25", "surface": "#20262D", "text": "#F5F7F9", "text_muted": "#B4BDC7", "border": "#3A434D"},
+    "premium_dark": {"background": "#151514", "background_alt": "#20201E", "surface": "#292825", "text": "#F6F2EA", "text_muted": "#C4BDB1", "border": "#45413A"}
+  },
+  "fallback_brand_palettes": [
+    {"id": "P01", "name": "Reliable Blue", "primary": "#245A8D", "accent": "#C07A32", "moods": ["seriös", "klar", "technisch"]},
+    {"id": "P02", "name": "Warm Terracotta", "primary": "#A4492D", "accent": "#2F6559", "moods": ["warm", "lokal", "persönlich"]},
+    {"id": "P03", "name": "Deep Forest", "primary": "#285747", "accent": "#B2763C", "moods": ["natürlich", "hochwertig", "bodenständig"]},
+    {"id": "P04", "name": "Modern Plum", "primary": "#67405F", "accent": "#B98256", "moods": ["ästhetisch", "ruhig", "premium"]},
+    {"id": "P05", "name": "Signal Red", "primary": "#D13C32", "accent": "#161616", "moods": ["mutig", "direkt", "dynamisch"]},
+    {"id": "P06", "name": "Heritage Navy", "primary": "#263C55", "accent": "#A06B3B", "moods": ["traditionell", "zeitlos", "vertrauensvoll"]}
+  ],
+  "prohibited": [
+    "automatische Branchenklischees wie Blau für jeden Technikbetrieb oder Rosa für Beauty",
+    "mehr als drei prominente Farben",
+    "Verläufe ohne Bezug zur Corporate Identity",
+    "sehr helle Markenfarbe als Button mit weißem Text",
+    "Pastelltext auf hellem Hintergrund",
+    "ungeprüfte Farbkombinationen aus Logoextraktion"
+  ]
+}
