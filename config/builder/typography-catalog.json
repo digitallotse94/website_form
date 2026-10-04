@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "sme-website-typography",
+  "source_policy": {
+    "allowed_sources": ["Google Fonts über next/font/google"],
+    "max_families_per_site": 2,
+    "max_loaded_weights_per_family": 4,
+    "rules": [
+      "Nur das ausgewählte Set laden, niemals den gesamten Katalog.",
+      "Fließtext niemals in Display-, Script- oder dekorativen Schriften setzen.",
+      "Keine künstlichen Font-Namen erfinden.",
+      "System-Fallbacks immer definieren.",
+      "Schriftgröße, Zeilenhöhe und Kontrast müssen auch mobil gut lesbar bleiben."
+    ]
+  },
+  "selection_logic": {
+    "primary_factor": "design_style_id",
+    "secondary_factors": ["brand_mood", "content_density", "headline_length", "existing_brand_font"],
+    "existing_brand_font_rule": "Eine vorhandene Markenschrift hat Vorrang, wenn Lizenz, Webnutzung, Zeichensatz und Lesbarkeit geklärt sind.",
+    "fallback_set_id": "T01"
+  },
+  "sets": [
+    {
+      "id": "T01",
+      "key": "neutral_clarity",
+      "name": "Neutral Clarity",
+      "heading": {"family": "Manrope", "next_font_export": "Manrope", "weights": [500, 600, 700, 800], "fallback": "Arial, sans-serif"},
+      "body": {"family": "Inter", "next_font_export": "Inter", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["neutral", "modern", "klar", "vielseitig"],
+      "recommended_styles": ["D01", "D06"],
+      "compatible_styles": ["D02", "D03", "D07"],
+      "avoid_for": ["stark nostalgische Marken", "bewusst rustikale Inszenierung"],
+      "implementation": {"heading_tracking_em": -0.03, "body_line_height": 1.65, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T02",
+      "key": "friendly_local",
+      "name": "Friendly Local",
+      "heading": {"family": "Plus Jakarta Sans", "next_font_export": "Plus_Jakarta_Sans", "weights": [500, 600, 700, 800], "fallback": "Arial, sans-serif"},
+      "body": {"family": "Source Sans 3", "next_font_export": "Source_Sans_3", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["freundlich", "offen", "persönlich", "zeitgemäß"],
+      "recommended_styles": ["D02"],
+      "compatible_styles": ["D01", "D08"],
+      "avoid_for": ["strenge technische Marken", "Brutalismus"],
+      "implementation": {"heading_tracking_em": -0.025, "body_line_height": 1.65, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T03",
+      "key": "technical_grid",
+      "name": "Technical Grid",
+      "heading": {"family": "Space Grotesk", "next_font_export": "Space_Grotesk", "weights": [500, 600, 700], "fallback": "Arial, sans-serif"},
+      "body": {"family": "Inter", "next_font_export": "Inter", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["präzise", "technisch", "geometrisch", "leistungsfähig"],
+      "recommended_styles": ["D03"],
+      "compatible_styles": ["D05", "D06"],
+      "avoid_for": ["Heritage", "traditionell-persönliche Marken"],
+      "implementation": {"heading_tracking_em": -0.035, "body_line_height": 1.6, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T04",
+      "key": "refined_premium",
+      "name": "Refined Premium",
+      "heading": {"family": "Playfair Display", "next_font_export": "Playfair_Display", "weights": [500, 600, 700], "fallback": "Georgia, serif"},
+      "body": {"family": "Manrope", "next_font_export": "Manrope", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["elegant", "hochwertig", "ruhig", "klassisch-modern"],
+      "recommended_styles": ["D04"],
+      "compatible_styles": ["D08", "D12"],
+      "avoid_for": ["technische Datenlastigkeit", "sehr lange Headlines"],
+      "implementation": {"heading_tracking_em": -0.02, "body_line_height": 1.7, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T05",
+      "key": "bold_progressive",
+      "name": "Bold Progressive",
+      "heading": {"family": "Syne", "next_font_export": "Syne", "weights": [600, 700, 800], "fallback": "Arial, sans-serif"},
+      "body": {"family": "Inter", "next_font_export": "Inter", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["progressiv", "markant", "jung", "selbstbewusst"],
+      "recommended_styles": ["D05"],
+      "compatible_styles": ["D10"],
+      "avoid_for": ["konservative Vertrauensbranchen", "lange sachliche Überschriften"],
+      "implementation": {"heading_tracking_em": -0.045, "body_line_height": 1.6, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T06",
+      "key": "product_focus",
+      "name": "Product Focus",
+      "heading": {"family": "Archivo", "next_font_export": "Archivo", "weights": [500, 600, 700, 800], "fallback": "Arial, sans-serif"},
+      "body": {"family": "Source Sans 3", "next_font_export": "Source_Sans_3", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["klar", "greifbar", "produktorientiert", "robust"],
+      "recommended_styles": ["D06"],
+      "compatible_styles": ["D01", "D03", "D09"],
+      "avoid_for": ["sehr luxuriöse Editorial-Marken"],
+      "implementation": {"heading_tracking_em": -0.025, "body_line_height": 1.62, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T07",
+      "key": "trusted_authority",
+      "name": "Trusted Authority",
+      "heading": {"family": "Merriweather", "next_font_export": "Merriweather", "weights": [400, 700, 900], "fallback": "Georgia, serif"},
+      "body": {"family": "Source Sans 3", "next_font_export": "Source_Sans_3", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["seriös", "kompetent", "vertrauenswürdig", "etabliert"],
+      "recommended_styles": ["D07"],
+      "compatible_styles": ["D01", "D12"],
+      "avoid_for": ["urbane Provokation", "extrem minimalistische Premium-Inszenierung"],
+      "implementation": {"heading_tracking_em": -0.015, "body_line_height": 1.7, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T08",
+      "key": "soft_lifestyle",
+      "name": "Soft Lifestyle",
+      "heading": {"family": "Fraunces", "next_font_export": "Fraunces", "weights": [500, 600, 700], "fallback": "Georgia, serif"},
+      "body": {"family": "Nunito Sans", "next_font_export": "Nunito_Sans", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["emotional", "weich", "ästhetisch", "einladend"],
+      "recommended_styles": ["D08"],
+      "compatible_styles": ["D02", "D04"],
+      "avoid_for": ["Industrie", "strenge technische Kommunikation"],
+      "implementation": {"heading_tracking_em": -0.02, "body_line_height": 1.68, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T09",
+      "key": "crafted_warmth",
+      "name": "Crafted Warmth",
+      "heading": {"family": "Roboto Slab", "next_font_export": "Roboto_Slab", "weights": [500, 600, 700, 800], "fallback": "Georgia, serif"},
+      "body": {"family": "Source Sans 3", "next_font_export": "Source_Sans_3", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["bodenständig", "warm", "handgemacht", "robust"],
+      "recommended_styles": ["D09"],
+      "compatible_styles": ["D02", "D06", "D11"],
+      "avoid_for": ["futuristische Tech-Marken", "ultraleichte Premium-Ästhetik"],
+      "implementation": {"heading_tracking_em": -0.015, "body_line_height": 1.66, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T10",
+      "key": "raw_statement",
+      "name": "Raw Statement",
+      "heading": {"family": "Archivo Black", "next_font_export": "Archivo_Black", "weights": [400], "fallback": "Arial Black, sans-serif"},
+      "body": {"family": "IBM Plex Mono", "next_font_export": "IBM_Plex_Mono", "weights": [400, 500, 600], "fallback": "Courier New, monospace"},
+      "character": ["roh", "direkt", "kantig", "provokant"],
+      "recommended_styles": ["D10"],
+      "compatible_styles": ["D05"],
+      "avoid_for": ["lange Lesetexte", "Gesundheit", "Finanzen", "konservative B2B-Zielgruppen"],
+      "implementation": {"heading_tracking_em": -0.035, "body_line_height": 1.58, "headline_case": "uppercase_only_for_short_headlines"}
+    },
+    {
+      "id": "T11",
+      "key": "heritage_character",
+      "name": "Heritage Character",
+      "heading": {"family": "Libre Baskerville", "next_font_export": "Libre_Baskerville", "weights": [400, 700], "fallback": "Georgia, serif"},
+      "body": {"family": "Work Sans", "next_font_export": "Work_Sans", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["traditionsbewusst", "zeitlos", "charaktervoll", "warm"],
+      "recommended_styles": ["D11"],
+      "compatible_styles": ["D07", "D09", "D12"],
+      "avoid_for": ["futuristische Produkte", "Brutalismus"],
+      "implementation": {"heading_tracking_em": -0.01, "body_line_height": 1.67, "headline_case": "sentence_case"}
+    },
+    {
+      "id": "T12",
+      "key": "editorial_story",
+      "name": "Editorial Story",
+      "heading": {"family": "Newsreader", "next_font_export": "Newsreader", "weights": [500, 600, 700], "fallback": "Georgia, serif"},
+      "body": {"family": "Inter", "next_font_export": "Inter", "weights": [400, 500, 600], "fallback": "Arial, sans-serif"},
+      "character": ["redaktionell", "kultiviert", "erzählerisch", "hochwertig"],
+      "recommended_styles": ["D12"],
+      "compatible_styles": ["D04", "D07", "D11"],
+      "avoid_for": ["sehr kompakte technische Interfaces", "ultrakurze Aktionsseiten"],
+      "implementation": {"heading_tracking_em": -0.02, "body_line_height": 1.72, "headline_case": "sentence_case"}
+    }
+  ],
+  "style_defaults": {
+    "D01": "T01", "D02": "T02", "D03": "T03", "D04": "T04",
+    "D05": "T05", "D06": "T06", "D07": "T07", "D08": "T08",
+    "D09": "T09", "D10": "T10", "D11": "T11", "D12": "T12"
+  }
+}
