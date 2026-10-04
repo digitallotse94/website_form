@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "sme-website-image-profiles",
+  "purpose": "Steuert Motiv, Bildstil, Komposition und Stockbildsuche unabhängig vom Designstil.",
+  "selection_logic": {
+    "inputs": ["industry", "offer", "target_audience", "design_style_id", "hero_layout", "available_own_images"],
+    "priority": ["geeignete eigene Bilder", "kuratierter Bildpool", "Stockbildsuche per Profil"],
+    "rule": "Profil nach realer Tätigkeit und Motivbedarf wählen, nicht allein nach Branchenbezeichnung.",
+    "fallback_profile_id": "I01"
+  },
+  "global_rules": {
+    "required": [
+      "Menschen und Arbeitsabläufe müssen fachlich plausibel sein.",
+      "Hero-Bilder benötigen zur Textposition passende ruhige Fläche.",
+      "Bildsprache innerhalb einer Website konsistent halten.",
+      "Rechte, Quelle und Lizenz dokumentieren.",
+      "Stockbilder vor Einsatz auf sichtbare Marken, Kennzeichen, Kundendaten und unpassende Details prüfen."
+    ],
+    "avoid": [
+      "Handshake-Motive",
+      "gestellte Gruppen mit Blick in die Kamera ohne Kontext",
+      "offensichtliche KI-Artefakte",
+      "beliebige Stadtansichten ohne Unternehmensbezug",
+      "symbolische Bilder, wenn reale Arbeit oder Ergebnis zeigbar ist",
+      "Text im Bild"
+    ],
+    "delivery": {"preferred_format": "webp", "hero_target_kb": "250-700", "content_target_kb": "100-400", "store_only_selected_assets": true}
+  },
+  "profiles": [
+    {
+      "id": "I01", "key": "professional_services", "name": "Professionelle Dienstleistungen",
+      "use_for": ["Beratung", "B2B-Service", "Agentur", "Projektarbeit"],
+      "keywords_en": ["professional consultation candid", "small business team working", "client workshop authentic", "modern service business"],
+      "preferred_subjects": ["echte Beratung", "Workshop", "Arbeitsprozess", "Personen im Kontext"],
+      "mood": ["kompetent", "klar", "authentisch"],
+      "hero_composition": ["subject-right text-left", "wide candid scene with negative space"],
+      "avoid": ["handshake", "staged boardroom", "people pointing at blank screen", "generic skyscraper"]
+    },
+    {
+      "id": "I02", "key": "local_personal_service", "name": "Lokaler persönlicher Service",
+      "use_for": ["lokale Dienstleistungen", "personenbezogene Services", "inhabergeführte Betriebe"],
+      "keywords_en": ["local business owner portrait candid", "small business customer service", "owner working in shop", "authentic local service"],
+      "preferred_subjects": ["Inhabende", "Team", "Kundenkontakt", "Räume", "lokales Umfeld"],
+      "mood": ["nahbar", "warm", "regional"],
+      "hero_composition": ["environmental portrait with negative space", "wide interior with person"],
+      "avoid": ["anonymous call center", "perfect model smile", "generic city skyline"]
+    },
+    {
+      "id": "I03", "key": "technical_installation", "name": "Technische Installation",
+      "use_for": ["Elektro", "SHK", "Gebäudetechnik", "Montage", "technischer Service"],
+      "keywords_en": ["technician hands installation detail", "electrical cabinet professional", "building systems maintenance", "technical installation close up"],
+      "preferred_subjects": ["Hände", "Werkzeug", "Bauteile", "Anlage", "Messung"],
+      "mood": ["präzise", "sauber", "kompetent"],
+      "hero_composition": ["detail-right text-left", "wide technical environment"],
+      "avoid": ["falsche Schutzkleidung", "dramatische Funken", "unrealistische Verkabelung", "Posieren mit Werkzeug"]
+    },
+    {
+      "id": "I04", "key": "industrial_production", "name": "Industrie & Produktion",
+      "use_for": ["Produktion", "Metall", "Maschinenbau", "Fertigung", "Zulieferung"],
+      "keywords_en": ["modern manufacturing process", "precision machining close up", "small factory production", "industrial quality control"],
+      "preferred_subjects": ["Maschinen", "Fertigung", "Qualitätskontrolle", "Material", "Mitarbeitende im Prozess"],
+      "mood": ["leistungsfähig", "präzise", "robust"],
+      "hero_composition": ["wide production line", "machine detail with negative space"],
+      "avoid": ["veraltete Großfabrik ohne Bezug", "Funken als reine Dekoration", "abstrakte Industrieillustration"]
+    },
+    {
+      "id": "I05", "key": "product_studio", "name": "Produkt im Fokus",
+      "use_for": ["Hersteller", "Handel", "Möbel", "Konsumprodukte", "Manufaktur"],
+      "keywords_en": ["premium product photography natural light", "product detail craftsmanship", "product in use lifestyle", "minimal product scene"],
+      "preferred_subjects": ["Produkt", "Materialdetail", "Anwendung", "Verpackung", "Ergebnis"],
+      "mood": ["greifbar", "hochwertig", "klar"],
+      "hero_composition": ["product-right text-left", "centered product with clean background"],
+      "avoid": ["beliebiger Freisteller", "unpassende Luxusrequisiten", "zu viele Produkte im Hero"]
+    },
+    {
+      "id": "I06", "key": "food_hospitality", "name": "Gastronomie & Genuss",
+      "use_for": ["Gastronomie", "Café", "Bäckerei", "Feinkost", "Lebensmittel", "Hotellerie"],
+      "keywords_en": ["restaurant atmosphere authentic", "artisan food preparation close up", "cafe interior natural light", "fresh food craft detail"],
+      "preferred_subjects": ["Speisen", "Zubereitung", "Räume", "Gastlichkeit", "Produkte"],
+      "mood": ["appetitlich", "warm", "atmosphärisch"],
+      "hero_composition": ["wide table or interior scene", "food detail with negative space"],
+      "avoid": ["überladene Buffets", "unrealistisch glänzendes Essen", "generische Kochmütze", "leere Deko-Tische"]
+    },
+    {
+      "id": "I07", "key": "beauty_wellness", "name": "Beauty & Wellness",
+      "use_for": ["Kosmetik", "Friseur", "Wellness", "Spa", "ästhetische Dienstleistungen"],
+      "keywords_en": ["beauty treatment authentic close up", "modern salon interior", "skincare studio professional", "hair stylist working candid"],
+      "preferred_subjects": ["Behandlung", "Ergebnis", "Hände", "Produkte", "Studio"],
+      "mood": ["ruhig", "hochwertig", "sauber", "persönlich"],
+      "hero_composition": ["treatment-right text-left", "wide calm studio interior"],
+      "avoid": ["Spa-Steine", "Orchideen und Handtuchstapel", "überretuschierte Haut", "unrealistische Vorher-Nachher-Bilder"]
+    },
+    {
+      "id": "I08", "key": "health_care", "name": "Gesundheit & Betreuung",
+      "use_for": ["Praxis", "Therapie", "Pflege", "Gesundheitsdienstleistung"],
+      "keywords_en": ["healthcare consultation authentic", "therapist patient conversation", "modern clinic interior natural", "care professional candid"],
+      "preferred_subjects": ["Gespräch", "Behandlungssituation", "Räume", "Fachpersonen", "Hilfsmittel"],
+      "mood": ["vertrauensvoll", "ruhig", "menschlich"],
+      "hero_composition": ["person-right text-left", "calm room with human context"],
+      "avoid": ["dramatische Krankheitsszenen", "Symbol-Stethoskop", "unrealistische Arzt-Models", "erkennbare Patientendaten"]
+    },
+    {
+      "id": "I09", "key": "construction_property", "name": "Bau & Immobilie",
+      "use_for": ["Bau", "Ausbau", "Architektur", "Immobilie", "Gebäudeservice"],
+      "keywords_en": ["construction craftsmanship detail", "modern building project exterior", "interior renovation process", "architectural detail natural light"],
+      "preferred_subjects": ["Projekt", "Material", "Baustelle", "Raum", "fertiges Ergebnis"],
+      "mood": ["solide", "räumlich", "hochwertig"],
+      "hero_composition": ["wide completed project", "material detail with text space"],
+      "avoid": ["fremde Landmarken", "unrealistische Großprojekte", "austauschbare Helme", "unsichere Arbeitssituationen"]
+    },
+    {
+      "id": "I10", "key": "mobility_automotive", "name": "Mobilität & Automotive",
+      "use_for": ["Kfz", "Fahrrad", "Logistik", "Mobilitätsservice", "Fahrzeughandel"],
+      "keywords_en": ["automotive workshop authentic", "vehicle service detail", "mechanic diagnostic professional", "mobility business modern"],
+      "preferred_subjects": ["Diagnose", "Werkstatt", "Fahrzeugdetail", "Übergabe", "Service"],
+      "mood": ["dynamisch", "präzise", "verlässlich"],
+      "hero_composition": ["vehicle-right text-left", "wide workshop scene"],
+      "avoid": ["falsche Markenpriorität", "Rennsport ohne Bezug", "ölverschmierte Klischees", "sichtbare Kennzeichen"]
+    },
+    {
+      "id": "I11", "key": "retail_shop", "name": "Einzelhandel & Laden",
+      "use_for": ["Einzelhandel", "Boutique", "Fachgeschäft", "lokaler Handel"],
+      "keywords_en": ["independent retail shop interior", "small business store owner", "curated shop products", "local boutique authentic"],
+      "preferred_subjects": ["Sortiment", "Ladenraum", "Beratung", "Details", "Inhabende"],
+      "mood": ["einladend", "kuratiert", "persönlich"],
+      "hero_composition": ["wide shop interior", "owner and product with negative space"],
+      "avoid": ["leere Regale", "anonyme Shoppingmall", "falsche Markenprodukte", "generische Einkaufstaschen"]
+    },
+    {
+      "id": "I12", "key": "creative_design", "name": "Kreativ & Design",
+      "use_for": ["Design", "Kreativstudio", "Fotografie", "Kultur", "Medien"],
+      "keywords_en": ["creative studio process candid", "designer workspace authentic", "art direction materials", "creative project detail"],
+      "preferred_subjects": ["Arbeitsprozess", "Material", "Entwürfe", "Projekte", "Studio"],
+      "mood": ["eigenständig", "kreativ", "kultiviert"],
+      "hero_composition": ["unusual crop with negative space", "editorial project image"],
+      "avoid": ["bunte Stifte als Kreativklischee", "generisches MacBook", "unbegründete abstrakte Kunst"]
+    },
+    {
+      "id": "I13", "key": "education_training", "name": "Bildung & Training",
+      "use_for": ["Weiterbildung", "Coaching", "Schulung", "Bildungsanbieter"],
+      "keywords_en": ["adult learning workshop authentic", "small group training candid", "professional coaching session", "hands on education"],
+      "preferred_subjects": ["Lernsituation", "Interaktion", "Praxisübung", "Moderation", "Teilnehmende"],
+      "mood": ["aktivierend", "kompetent", "offen"],
+      "hero_composition": ["trainer-right text-left", "wide workshop scene"],
+      "avoid": ["gestellte Seminargruppe", "Tafel mit Fake-Formeln", "Kinderbilder bei Erwachsenenangebot"]
+    },
+    {
+      "id": "I14", "key": "outdoor_green", "name": "Natur & Außenbereich",
+      "use_for": ["Gartenbau", "Landwirtschaft", "Umweltservice", "Outdoor", "Tourismus"],
+      "keywords_en": ["landscaping work authentic", "small sustainable business outdoors", "garden project professional", "nature service detail"],
+      "preferred_subjects": ["Außenprojekt", "Pflanzen", "Landschaft", "Arbeit", "Material"],
+      "mood": ["natürlich", "frisch", "bodenständig"],
+      "hero_composition": ["wide landscape project", "worker-right text-left"],
+      "avoid": ["beliebige Naturpanoramen", "übertriebene Nachhaltigkeitssymbolik", "fachlich falsche Pflanzen oder Geräte"]
+    },
+    {
+      "id": "I15", "key": "craft_manufacturing", "name": "Handwerk & Herstellung",
+      "use_for": ["Manufaktur", "Holz", "Metall", "Textil", "Reparatur", "Genusshandwerk"],
+      "keywords_en": ["artisan hands working close up", "craft workshop authentic", "material craftsmanship detail", "small manufacturing process"],
+      "preferred_subjects": ["Hände", "Material", "Werkzeug", "Herstellung", "fertiges Werk"],
+      "mood": ["greifbar", "ehrlich", "detailorientiert"],
+      "hero_composition": ["hands-right text-left", "wide workshop with maker"],
+      "avoid": ["historisierende Kostüme", "falsches Werkzeug", "übertriebener Schmutz", "Posieren"]
+    },
+    {
+      "id": "I16", "key": "digital_technology", "name": "Digital & Technologie",
+      "use_for": ["Software", "IT-Service", "Automatisierung", "Digitalunternehmen"],
+      "keywords_en": ["software team collaboration candid", "technology service workspace", "digital product interface context", "IT professional authentic"],
+      "preferred_subjects": ["Menschen bei Zusammenarbeit", "Produkt im Einsatz", "Interface im Kontext", "Technik"],
+      "mood": ["innovativ", "klar", "intelligent"],
+      "hero_composition": ["interface-right text-left", "team scene with clean space"],
+      "avoid": ["leuchtender Code im Gesicht", "Roboterhand", "blaue Weltkugel", "Hoodie-Hacker"]
+    },
+    {
+      "id": "I17", "key": "finance_legal", "name": "Finanzen, Recht & Vertrauen",
+      "use_for": ["Finanzen", "Recht", "Steuern", "Versicherung", "Compliance"],
+      "keywords_en": ["professional advisor client conversation", "legal consultation authentic", "financial planning small business", "trusted expert portrait office"],
+      "preferred_subjects": ["Beratung", "Fachperson", "Dokumente ohne lesbare Daten", "Büro", "Gespräch"],
+      "mood": ["seriös", "diskret", "vertrauenswürdig"],
+      "hero_composition": ["advisor-right text-left", "calm office scene"],
+      "avoid": ["Richterhammer", "Goldmünzen", "Handshake", "Luxushochhaus", "lesbare vertrauliche Daten"]
+    },
+    {
+      "id": "I18", "key": "heritage_tradition", "name": "Tradition & Heritage",
+      "use_for": ["Traditionsbetrieb", "Oldtimer", "Genussmarke", "historische Manufaktur"],
+      "keywords_en": ["heritage brand workshop", "traditional craft authentic", "vintage business interior natural", "historic product detail"],
+      "preferred_subjects": ["historische Details", "Produkte", "Räume", "Herstellung", "Archivmaterial mit Rechten"],
+      "mood": ["zeitlos", "warm", "charaktervoll"],
+      "hero_composition": ["atmospheric wide scene", "heritage detail with negative space"],
+      "avoid": ["beliebige Vintage-Requisiten", "starker Instagram-Filter", "unechte Patina", "falsche Epoche"]
+    }
+  ],
+  "style_affinities": {
+    "D01": ["I01", "I16", "I17"], "D02": ["I02", "I08", "I11", "I13"],
+    "D03": ["I03", "I04", "I09", "I10", "I16"], "D04": ["I05", "I07", "I09", "I12"],
+    "D05": ["I10", "I12", "I16"], "D06": ["I05", "I06", "I11", "I15"],
+    "D07": ["I01", "I08", "I17"], "D08": ["I06", "I07", "I11", "I14"],
+    "D09": ["I06", "I14", "I15", "I18"], "D10": ["I06", "I10", "I12"],
+    "D11": ["I06", "I10", "I11", "I18"], "D12": ["I01", "I09", "I12", "I15", "I18"]
+  }
+}

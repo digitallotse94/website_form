@@ -19,6 +19,37 @@ export const maxDuration = 60;
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.7-flash";
 
+type DesignStyle = {
+  id: string;
+  key: string;
+  name: string;
+  group: "core" | "special";
+  summary: string;
+  selection_signals: string[];
+  avoid_when: string[];
+  [key: string]: unknown;
+};
+
+const designCatalog = require("../config/builder/design-catalog.json") as {
+  schema_version: string;
+  catalog_id: string;
+  selection_logic: {
+    fallback_style_id: string;
+    core_style_rule: string;
+    special_style_rule: string;
+  };
+  styles: DesignStyle[];
+};
+
+const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
+  id: style.id,
+  name: style.name,
+  group: style.group,
+  summary: style.summary,
+  selection_signals: style.selection_signals,
+  avoid_when: style.avoid_when
+}));
+
 export default async function handler(req: any, res: any) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -139,11 +170,13 @@ if (!generated.blueprint || !generated.website_copy) {
   });
 }
 
+  const selectedDesignStyle = resolveDesignStyle(generated.blueprint);
 
   const vibePrompt = buildV0Prompt(
     input,
     generated.blueprint,
-    generated.website_copy
+    generated.website_copy,
+    selectedDesignStyle
   );
 
   return res.status(200).json({
@@ -151,6 +184,12 @@ if (!generated.blueprint || !generated.website_copy) {
     blueprint: generated.blueprint,
     website_copy: generated.website_copy,
     vibe_prompt: vibePrompt,
+    design_system: {
+      style_id: selectedDesignStyle.id,
+      style_name: selectedDesignStyle.name,
+      catalog_id: designCatalog.catalog_id,
+      catalog_version: designCatalog.schema_version
+    },
     meta: {
       model: GEMINI_MODEL,
       website_source: websiteSource,
@@ -370,6 +409,20 @@ ${websiteSource}
 INHALT DER BESTEHENDEN WEBSITE
 ${websiteText || "[Kein verwertbarer Website-Inhalt verfügbar]"}
 
+DESIGN-STIL-KATALOG
+Wähle genau einen Design-Stil aus dem folgenden Katalog. Kern-Styles sind der
+Standard. Spezial-Styles dürfen nur gewählt werden, wenn der Betrieb ausdrücklich
+eine solche Richtung erkennen lässt oder mindestens drei starke Auswahlsignale
+erfüllt und kein Ausschlusskriterium zutrifft.
+
+Katalogregeln:
+- ${designCatalog.selection_logic.core_style_rule}
+- ${designCatalog.selection_logic.special_style_rule}
+- Fallback bei unklarer Datenlage: ${designCatalog.selection_logic.fallback_style_id}
+
+Verfügbare Styles:
+${JSON.stringify(DESIGN_STYLE_SUMMARY, null, 2)}
+
 BLUEPRINT
 Ermittle:
 - Branche und Unternehmenstyp
@@ -383,6 +436,8 @@ Ermittle:
 - passende Tonalität
 - passende, bewusst reduzierte Designrichtung im Stil einer hochwertigen
   Unternehmens-Visitenkarte
+- genau eine design_style_id aus dem Design-Stil-Katalog und eine kurze,
+  nachvollziehbare design_style_reason
 - Markenfarben der bestehenden Website sowie geeignete neutrale Hintergrundfarben
 - ein branchenspezifisches Hero-Bildkonzept mit Fokus auf Materialien, Produkte,
   Werkzeuge oder charakteristische Arbeitsdetails
@@ -414,10 +469,31 @@ WICHTIG ZU DEN AUSGABEFELDERN
 Die Ausgabe muss exakt dem vorgegebenen JSON-Schema entsprechen.`;
 }
 
+function resolveDesignStyle(blueprint: JsonRecord): DesignStyle {
+  const strategy =
+    blueprint.strategy && typeof blueprint.strategy === "object"
+      ? (blueprint.strategy as JsonRecord)
+      : {};
+
+  const requestedId = clean(strategy.design_style_id).toUpperCase();
+  const fallbackId = designCatalog.selection_logic.fallback_style_id || "D01";
+  const selected =
+    designCatalog.styles.find((style) => style.id === requestedId) ||
+    designCatalog.styles.find((style) => style.id === fallbackId) ||
+    designCatalog.styles[0];
+
+  if (!selected) {
+    throw new Error("design_catalog_empty");
+  }
+
+  return selected;
+}
+
 function buildV0Prompt(
   data: BusinessInput,
   blueprint: JsonRecord,
-  websiteCopy: JsonRecord
+  websiteCopy: JsonRecord,
+  selectedDesignStyle: DesignStyle
 ): string {
   const sourceNote = data.existing_website
     ? data.existing_website
@@ -470,6 +546,14 @@ Verwende Informationen in dieser Reihenfolge:
 4. BESTEHENDE WEBSITE: Sie dient als wichtige Quelle für das vorhandene Markendesign, ist aber keine verlässliche Quelle für veränderliche Unternehmensangaben.
 
 Bei Widersprüchen haben die direkten Formulardaten immer Vorrang.
+
+VERBINDLICHER DESIGN-STIL AUS DEM KATALOG
+Setze den folgenden Stil konsequent um. Er steuert Layout, Typografie-Charakter,
+Bildwirkung, Flächen, Abstände und Komponentenwahl. Vorhandene Markenfarben,
+Logo-Regeln, Barrierefreiheit und die tatsächlichen Unternehmensinhalte haben bei
+einem Konflikt Vorrang. Erfinde keine neue Markenidentität.
+
+${JSON.stringify(selectedDesignStyle, null, 2)}
 
 Leere Felder aus Blueprint oder Website-Texten bedeuten: Das entsprechende
 Element soll nicht gerendert werden. Erzeuge niemals vorsorglich eine Eyebrow,
@@ -769,14 +853,21 @@ const OUTPUT_SCHEMA = {
             "primary_cta",
             "secondary_cta",
             "tone",
-            "design_direction"
+            "design_direction",
+            "design_style_id",
+            "design_style_reason"
           ],
           properties: {
             primary_goal: S,
             primary_cta: S,
             secondary_cta: S,
             tone: S,
-            design_direction: S
+            design_direction: S,
+            design_style_id: {
+              type: "string",
+              enum: designCatalog.styles.map((style) => style.id)
+            },
+            design_style_reason: S
           }
         },
         services: {
