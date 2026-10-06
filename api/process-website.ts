@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -15,9 +15,19 @@ type BusinessInput = {
   existing_website: string;
 };
 
-export const maxDuration = 60;
+export const maxDuration = 80;
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.7-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const GEMINI_FALLBACK_MODEL =
+  process.env.GEMINI_FALLBACK_MODEL || "gemini-3.6-flash";
+const GEMINI_REQUEST_TIMEOUT_MS = 45000;
+const GEMINI_TOTAL_TIMEOUT_MS = 75000;
+
+type GeminiGenerationResult = {
+  response: any;
+  model: string;
+  attempts: number;
+};
 
 type DesignStyle = {
   id: string;
@@ -93,47 +103,28 @@ export default async function handler(req: any, res: any) {
   }
 
 
-const ai = new GoogleGenAI({ apiKey: geminiKey });
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
 
-const controller = new AbortController();
-const geminiTimeout = setTimeout(() => {
-  controller.abort();
-}, 50000);
+  let generationResult: GeminiGenerationResult;
 
-let response: any;
+  try {
+    generationResult = await generateWithRetryAndFallback(
+      ai,
+      buildPrompt(input, websiteText, websiteSource)
+    );
+  } catch (error) {
+    console.error("Gemini request failed after retries and fallback", error);
 
-try {
-  response = await ai.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: buildPrompt(input, websiteText, websiteSource),
-    config: {
-      thinkingConfig: {
-        thinkingLevel: "low"
-      },
-      responseMimeType: "application/json",
-      responseSchema: OUTPUT_SCHEMA,
-      maxOutputTokens: 8192,
-      temperature: 0.3,
-      abortSignal: controller.signal,
-      httpOptions: {
-        timeout: 50000
-      }
-    }
-  });
-} catch (error) {
-  console.error("Gemini request failed", error);
-
-  return res.status(502).json({
-    ok: false,
-    error:
-      controller.signal.aborted
+    return res.status(502).json({
+      ok: false,
+      error: isTimeoutError(error)
         ? "gemini_timeout"
         : "gemini_request_failed",
-    details: error instanceof Error ? error.message : String(error)
-  });
-} finally {
-  clearTimeout(geminiTimeout);
-}
+      details: error instanceof Error ? error.message : String(error)
+    });
+  }
+
+  const { response, model: usedModel, attempts } = generationResult;
 
 const outputText =
   typeof response?.text === "string"
@@ -191,12 +182,102 @@ if (!generated.blueprint || !generated.website_copy) {
       catalog_version: designCatalog.schema_version
     },
     meta: {
-      model: GEMINI_MODEL,
+      model: usedModel,
+      attempts,
+      fallback_used: usedModel !== GEMINI_MODEL,
       website_source: websiteSource,
       website_text_characters: websiteText.length,
       usage: response?.usageMetadata ?? null
     }
   });
+}
+
+async function generateWithRetryAndFallback(
+  ai: GoogleGenAI,
+  prompt: string
+): Promise<GeminiGenerationResult> {
+  const attemptPlan = [
+    { model: GEMINI_MODEL, delayMs: 0 },
+    { model: GEMINI_MODEL, delayMs: 2500 },
+    { model: GEMINI_FALLBACK_MODEL, delayMs: 6000 }
+  ].filter(
+    (attempt, index, attempts) =>
+      index < 2 || attempt.model !== attempts[0].model
+  );
+  const deadline = Date.now() + GEMINI_TOTAL_TIMEOUT_MS;
+  let lastError: unknown;
+
+  for (let index = 0; index < attemptPlan.length; index += 1) {
+    const attempt = attemptPlan[index];
+
+    if (attempt.delayMs > 0) {
+      await sleep(attempt.delayMs);
+    }
+
+    const remainingMs = deadline - Date.now();
+    if (remainingMs < 5000) break;
+
+    const timeoutMs = Math.min(GEMINI_REQUEST_TIMEOUT_MS, remainingMs);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await ai.models.generateContent({
+        model: attempt.model,
+        contents: prompt,
+        config: {
+          thinkingConfig: {
+            thinkingLevel: ThinkingLevel.LOW
+          },
+          responseMimeType: "application/json",
+          responseSchema: OUTPUT_SCHEMA,
+          maxOutputTokens: 8192,
+          temperature: 0.3,
+          abortSignal: controller.signal,
+          httpOptions: {
+            timeout: timeoutMs
+          }
+        }
+      });
+
+      return {
+        response,
+        model: attempt.model,
+        attempts: index + 1
+      };
+    } catch (error) {
+      lastError = error;
+      console.warn(
+        `Gemini attempt ${index + 1} with ${attempt.model} failed`,
+        error
+      );
+
+      if (!isTransientGeminiError(error)) {
+        throw error;
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  throw lastError || new Error("gemini_retry_budget_exhausted");
+}
+
+function isTransientGeminiError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return /(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|high demand|timeout|aborted|ECONNRESET|ETIMEDOUT)/i.test(
+    message
+  );
+}
+
+function isTimeoutError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /(timeout|aborted|ETIMEDOUT)/i.test(message);
+}
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function safeParseJson(value: string): JsonRecord | null {
