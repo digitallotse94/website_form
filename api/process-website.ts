@@ -70,6 +70,33 @@ type ImageProfile = {
   [key: string]: unknown;
 };
 
+type HeroVariant = {
+  id: string;
+  name: string;
+  best_for: string[];
+  [key: string]: unknown;
+};
+
+type ContentPattern = {
+  id: string;
+  name: string;
+  compatible_styles: string[];
+  [key: string]: unknown;
+};
+
+type ContactVariant = {
+  id: string;
+  name: string;
+  best_for: string[];
+  [key: string]: unknown;
+};
+
+type ComponentSelection = {
+  hero: HeroVariant;
+  content: ContentPattern[];
+  contact: ContactVariant;
+};
+
 const designCatalog = require("../config/builder/design-catalog.json") as {
   schema_version: string;
   catalog_id: string;
@@ -118,6 +145,21 @@ const imageProfileCatalog = require("../config/builder/image-profile-catalog.jso
   style_affinities: Record<string, string[]>;
 };
 
+const componentCatalog = require("../config/builder/component-catalog.json") as {
+  schema_version: string;
+  catalog_id: string;
+  purpose: string;
+  global_rules: JsonRecord;
+  hero_variants: HeroVariant[];
+  content_patterns: ContentPattern[];
+  contact_variants: ContactVariant[];
+  assembly_rules: JsonRecord;
+  style_defaults: Record<
+    string,
+    { hero: string; content: string[]; contact: string }
+  >;
+};
+
 const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
   id: style.id,
   name: style.name,
@@ -135,6 +177,14 @@ const IMAGE_PROFILE_SUMMARY = imageProfileCatalog.profiles.map((profile) => ({
   mood: profile.mood,
   avoid: profile.avoid
 }));
+
+const COMPONENT_CATALOG_SUMMARY = {
+  hero_variants: componentCatalog.hero_variants,
+  content_patterns: componentCatalog.content_patterns,
+  contact_variants: componentCatalog.contact_variants,
+  assembly_rules: componentCatalog.assembly_rules,
+  style_defaults: componentCatalog.style_defaults
+};
 
 export default async function handler(req: any, res: any) {
   res.setHeader("Cache-Control", "no-store");
@@ -244,6 +294,10 @@ if (!generated.blueprint || !generated.website_copy) {
     generated.blueprint,
     selectedDesignStyle.id
   );
+  const selectedComponents = resolveComponentSelection(
+    generated.blueprint,
+    selectedDesignStyle.id
+  );
 
   const vibePrompt = buildV0Prompt(
     input,
@@ -252,7 +306,8 @@ if (!generated.blueprint || !generated.website_copy) {
     selectedDesignStyle,
     selectedTypography,
     selectedPaletteGuidance,
-    selectedImageProfile
+    selectedImageProfile,
+    selectedComponents
   );
 
   return res.status(200).json({
@@ -270,6 +325,12 @@ if (!generated.blueprint || !generated.website_copy) {
         selectedPaletteGuidance.style_application.brand_coverage,
       image_profile_id: selectedImageProfile.id,
       image_profile_name: selectedImageProfile.name,
+      hero_variant_id: selectedComponents.hero.id,
+      hero_variant_name: selectedComponents.hero.name,
+      content_pattern_ids: selectedComponents.content.map((item) => item.id),
+      content_pattern_names: selectedComponents.content.map((item) => item.name),
+      contact_variant_id: selectedComponents.contact.id,
+      contact_variant_name: selectedComponents.contact.name,
       catalog_id: designCatalog.catalog_id,
       catalog_version: designCatalog.schema_version,
       typography_catalog_id: typographyCatalog.catalog_id,
@@ -277,7 +338,9 @@ if (!generated.blueprint || !generated.website_copy) {
       palette_catalog_id: paletteRules.catalog_id,
       palette_catalog_version: paletteRules.schema_version,
       image_catalog_id: imageProfileCatalog.catalog_id,
-      image_catalog_version: imageProfileCatalog.schema_version
+      image_catalog_version: imageProfileCatalog.schema_version,
+      component_catalog_id: componentCatalog.catalog_id,
+      component_catalog_version: componentCatalog.schema_version
     },
     meta: {
       model: usedModel,
@@ -614,6 +677,15 @@ Katalogregel:
 Verfügbare Bildprofile:
 ${JSON.stringify(IMAGE_PROFILE_SUMMARY, null, 2)}
 
+KOMPONENTEN-KATALOG
+Wähle eine Hero-Variante, ein bis drei Inhaltsmuster und eine Kontaktvariante.
+Alle gewählten Komponenten müssen mit der design_style_id kompatibel sein und
+eine konkrete inhaltliche Aufgabe erfüllen. Verwende die Style-Standards als
+Fallback, aber weiche davon ab, wenn Unternehmensdaten und Inhalte eine passendere
+kompatible Variante begründen. Füge keine Komponente nur zur Dekoration hinzu.
+
+${JSON.stringify(COMPONENT_CATALOG_SUMMARY, null, 2)}
+
 BLUEPRINT
 Ermittle:
 - Branche und Unternehmenstyp
@@ -631,6 +703,8 @@ Ermittle:
   nachvollziehbare design_style_reason
 - genau eine image_profile_id aus dem Bildprofil-Katalog und eine kurze,
   nachvollziehbare image_profile_reason
+- genau eine hero_variant_id, ein bis drei content_pattern_ids und genau eine
+  contact_variant_id aus dem Komponenten-Katalog sowie eine kurze component_reason
 - Markenfarben der bestehenden Website sowie geeignete neutrale Hintergrundfarben
 - ein branchenspezifisches Hero-Bildkonzept mit Fokus auf Materialien, Produkte,
   Werkzeuge oder charakteristische Arbeitsdetails
@@ -746,6 +820,62 @@ function resolveImageProfile(
   return selected;
 }
 
+function resolveComponentSelection(
+  blueprint: JsonRecord,
+  styleId: string
+): ComponentSelection {
+  const strategy =
+    blueprint.strategy && typeof blueprint.strategy === "object"
+      ? (blueprint.strategy as JsonRecord)
+      : {};
+  const defaults = componentCatalog.style_defaults[styleId];
+
+  if (!defaults) {
+    throw new Error(`component_defaults_missing_${styleId}`);
+  }
+
+  const requestedHeroId = clean(strategy.hero_variant_id).toUpperCase();
+  const hero =
+    componentCatalog.hero_variants.find(
+      (item) => item.id === requestedHeroId && item.best_for.includes(styleId)
+    ) ||
+    componentCatalog.hero_variants.find((item) => item.id === defaults.hero);
+
+  const requestedContentIds = Array.isArray(strategy.content_pattern_ids)
+    ? strategy.content_pattern_ids.map(clean).map((id) => id.toUpperCase())
+    : [];
+  const compatibleRequestedContent = requestedContentIds
+    .map((id) => componentCatalog.content_patterns.find((item) => item.id === id))
+    .filter(
+      (item): item is ContentPattern =>
+        Boolean(item && item.compatible_styles.includes(styleId))
+    )
+    .slice(0, 3);
+  const content = compatibleRequestedContent.length
+    ? compatibleRequestedContent
+    : defaults.content
+        .map((id) =>
+          componentCatalog.content_patterns.find((item) => item.id === id)
+        )
+        .filter((item): item is ContentPattern => Boolean(item));
+
+  const requestedContactId = clean(strategy.contact_variant_id).toUpperCase();
+  const contact =
+    componentCatalog.contact_variants.find(
+      (item) =>
+        item.id === requestedContactId && item.best_for.includes(styleId)
+    ) ||
+    componentCatalog.contact_variants.find(
+      (item) => item.id === defaults.contact
+    );
+
+  if (!hero || !content.length || !contact) {
+    throw new Error(`component_catalog_incomplete_${styleId}`);
+  }
+
+  return { hero, content, contact };
+}
+
 function buildV0Prompt(
   data: BusinessInput,
   blueprint: JsonRecord,
@@ -753,7 +883,8 @@ function buildV0Prompt(
   selectedDesignStyle: DesignStyle,
   selectedTypography: TypographySet,
   selectedPaletteGuidance: JsonRecord,
-  selectedImageProfile: ImageProfile
+  selectedImageProfile: ImageProfile,
+  selectedComponents: ComponentSelection
 ): string {
   const sourceNote = data.existing_website
     ? data.existing_website
@@ -842,6 +973,15 @@ Grundlage einer Stockbildsuche, aber kein Auftrag, beliebige Treffer ungeprüft
 zu übernehmen. Eigene geeignete Unternehmensbilder haben weiterhin Vorrang.
 
 ${JSON.stringify(selectedImageProfile, null, 2)}
+
+VERBINDLICHE KOMPONENTENAUSWAHL AUS DEM KATALOG
+Setze diese Hero-, Inhalts- und Kontaktvarianten als strukturelle Grundlage um.
+Die Inhaltsreihenfolge darf an die tatsächlichen Inhalte angepasst werden, aber
+ersetze die gewählten Varianten nicht durch generische Kartenwände, Banner oder
+zusätzliche Komponenten. Lasse ein Inhaltsmuster weg, wenn dafür keine belegbaren
+Inhalte vorhanden sind.
+
+${JSON.stringify(selectedComponents, null, 2)}
 
 Leere Felder aus Blueprint oder Website-Texten bedeuten: Das entsprechende
 Element soll nicht gerendert werden. Erzeuge niemals vorsorglich eine Eyebrow,
@@ -1145,7 +1285,11 @@ const OUTPUT_SCHEMA = {
             "design_style_id",
             "design_style_reason",
             "image_profile_id",
-            "image_profile_reason"
+            "image_profile_reason",
+            "hero_variant_id",
+            "content_pattern_ids",
+            "contact_variant_id",
+            "component_reason"
           ],
           properties: {
             primary_goal: S,
@@ -1162,7 +1306,25 @@ const OUTPUT_SCHEMA = {
               type: "string",
               enum: imageProfileCatalog.profiles.map((profile) => profile.id)
             },
-            image_profile_reason: S
+            image_profile_reason: S,
+            hero_variant_id: {
+              type: "string",
+              enum: componentCatalog.hero_variants.map((item) => item.id)
+            },
+            content_pattern_ids: {
+              type: "array",
+              minItems: 1,
+              maxItems: 3,
+              items: {
+                type: "string",
+                enum: componentCatalog.content_patterns.map((item) => item.id)
+              }
+            },
+            contact_variant_id: {
+              type: "string",
+              enum: componentCatalog.contact_variants.map((item) => item.id)
+            },
+            component_reason: S
           }
         },
         services: {
