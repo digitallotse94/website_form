@@ -50,6 +50,13 @@ type TypographySet = {
   [key: string]: unknown;
 };
 
+type PaletteStyleApplication = {
+  background_mode: string;
+  brand_coverage: string;
+  accent_count: number;
+  notes: string;
+};
+
 const designCatalog = require("../config/builder/design-catalog.json") as {
   schema_version: string;
   catalog_id: string;
@@ -69,6 +76,20 @@ const typographyCatalog = require("../config/builder/typography-catalog.json") a
   };
   sets: TypographySet[];
   style_defaults: Record<string, string>;
+};
+
+const paletteRules = require("../config/builder/palette-rules.json") as {
+  schema_version: string;
+  catalog_id: string;
+  principle: string;
+  input_priority: string[];
+  output_tokens: string[];
+  generation_rules: JsonRecord;
+  accessibility: JsonRecord;
+  style_application: Record<string, PaletteStyleApplication>;
+  neutral_presets: JsonRecord;
+  fallback_brand_palettes: JsonRecord[];
+  prohibited: string[];
 };
 
 const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
@@ -183,13 +204,15 @@ if (!generated.blueprint || !generated.website_copy) {
 
   const selectedDesignStyle = resolveDesignStyle(generated.blueprint);
   const selectedTypography = resolveTypographySet(selectedDesignStyle.id);
+  const selectedPaletteGuidance = resolvePaletteGuidance(selectedDesignStyle.id);
 
   const vibePrompt = buildV0Prompt(
     input,
     generated.blueprint,
     generated.website_copy,
     selectedDesignStyle,
-    selectedTypography
+    selectedTypography,
+    selectedPaletteGuidance
   );
 
   return res.status(200).json({
@@ -202,10 +225,15 @@ if (!generated.blueprint || !generated.website_copy) {
       style_name: selectedDesignStyle.name,
       typography_id: selectedTypography.id,
       typography_name: selectedTypography.name,
+      palette_mode: selectedPaletteGuidance.style_application.background_mode,
+      palette_brand_coverage:
+        selectedPaletteGuidance.style_application.brand_coverage,
       catalog_id: designCatalog.catalog_id,
       catalog_version: designCatalog.schema_version,
       typography_catalog_id: typographyCatalog.catalog_id,
-      typography_catalog_version: typographyCatalog.schema_version
+      typography_catalog_version: typographyCatalog.schema_version,
+      palette_catalog_id: paletteRules.catalog_id,
+      palette_catalog_version: paletteRules.schema_version
     },
     meta: {
       model: usedModel,
@@ -611,12 +639,35 @@ function resolveTypographySet(styleId: string): TypographySet {
   return selected;
 }
 
+function resolvePaletteGuidance(styleId: string): JsonRecord & {
+  style_application: PaletteStyleApplication;
+} {
+  const styleApplication = paletteRules.style_application[styleId];
+
+  if (!styleApplication) {
+    throw new Error(`palette_style_missing_${styleId}`);
+  }
+
+  return {
+    principle: paletteRules.principle,
+    input_priority: paletteRules.input_priority,
+    output_tokens: paletteRules.output_tokens,
+    generation_rules: paletteRules.generation_rules,
+    accessibility: paletteRules.accessibility,
+    style_application: styleApplication,
+    neutral_presets: paletteRules.neutral_presets,
+    fallback_brand_palettes: paletteRules.fallback_brand_palettes,
+    prohibited: paletteRules.prohibited
+  };
+}
+
 function buildV0Prompt(
   data: BusinessInput,
   blueprint: JsonRecord,
   websiteCopy: JsonRecord,
   selectedDesignStyle: DesignStyle,
-  selectedTypography: TypographySet
+  selectedTypography: TypographySet,
+  selectedPaletteGuidance: JsonRecord
 ): string {
   const sourceNote = data.existing_website
     ? data.existing_website
@@ -685,6 +736,17 @@ Auswahl nicht eigenmächtig. Die Überschriftenschrift ist nur für Überschrift
 und kurze Hervorhebungen vorgesehen; längere Texte verwenden die Body-Schrift.
 
 ${JSON.stringify(selectedTypography, null, 2)}
+
+VERBINDLICHE FARBREGELN AUS DEM KATALOG
+Wende die folgenden Regeln in ihrer Priorität an. Bestehende und eindeutig
+erkennbare Unternehmensfarben haben Vorrang. Der Design-Stil bestimmt deren
+Flächenanteil und Anwendung, nicht die Branche. Wenn keine belastbare Markenfarbe
+ermittelt werden kann, wähle genau eine passende Fallback-Palette aus der
+übergebenen Liste und dokumentiere sie im Code über zentrale CSS-Variablen.
+Erfinde keine zusätzliche prominente Farbe. Prüfe alle Text-, Button- und
+Fokuskontraste nach den enthaltenen Barrierefreiheitsregeln.
+
+${JSON.stringify(selectedPaletteGuidance, null, 2)}
 
 Leere Felder aus Blueprint oder Website-Texten bedeuten: Das entsprechende
 Element soll nicht gerendert werden. Erzeuge niemals vorsorglich eine Eyebrow,
