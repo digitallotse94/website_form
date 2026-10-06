@@ -40,6 +40,16 @@ type DesignStyle = {
   [key: string]: unknown;
 };
 
+type TypographySet = {
+  id: string;
+  key: string;
+  name: string;
+  heading: JsonRecord;
+  body: JsonRecord;
+  implementation: JsonRecord;
+  [key: string]: unknown;
+};
+
 const designCatalog = require("../config/builder/design-catalog.json") as {
   schema_version: string;
   catalog_id: string;
@@ -49,6 +59,16 @@ const designCatalog = require("../config/builder/design-catalog.json") as {
     special_style_rule: string;
   };
   styles: DesignStyle[];
+};
+
+const typographyCatalog = require("../config/builder/typography-catalog.json") as {
+  schema_version: string;
+  catalog_id: string;
+  selection_logic: {
+    fallback_set_id: string;
+  };
+  sets: TypographySet[];
+  style_defaults: Record<string, string>;
 };
 
 const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
@@ -162,12 +182,14 @@ if (!generated.blueprint || !generated.website_copy) {
 }
 
   const selectedDesignStyle = resolveDesignStyle(generated.blueprint);
+  const selectedTypography = resolveTypographySet(selectedDesignStyle.id);
 
   const vibePrompt = buildV0Prompt(
     input,
     generated.blueprint,
     generated.website_copy,
-    selectedDesignStyle
+    selectedDesignStyle,
+    selectedTypography
   );
 
   return res.status(200).json({
@@ -178,8 +200,12 @@ if (!generated.blueprint || !generated.website_copy) {
     design_system: {
       style_id: selectedDesignStyle.id,
       style_name: selectedDesignStyle.name,
+      typography_id: selectedTypography.id,
+      typography_name: selectedTypography.name,
       catalog_id: designCatalog.catalog_id,
-      catalog_version: designCatalog.schema_version
+      catalog_version: designCatalog.schema_version,
+      typography_catalog_id: typographyCatalog.catalog_id,
+      typography_catalog_version: typographyCatalog.schema_version
     },
     meta: {
       model: usedModel,
@@ -570,11 +596,27 @@ function resolveDesignStyle(blueprint: JsonRecord): DesignStyle {
   return selected;
 }
 
+function resolveTypographySet(styleId: string): TypographySet {
+  const requestedId = typographyCatalog.style_defaults[styleId];
+  const fallbackId = typographyCatalog.selection_logic.fallback_set_id || "T01";
+  const selected =
+    typographyCatalog.sets.find((set) => set.id === requestedId) ||
+    typographyCatalog.sets.find((set) => set.id === fallbackId) ||
+    typographyCatalog.sets[0];
+
+  if (!selected) {
+    throw new Error("typography_catalog_empty");
+  }
+
+  return selected;
+}
+
 function buildV0Prompt(
   data: BusinessInput,
   blueprint: JsonRecord,
   websiteCopy: JsonRecord,
-  selectedDesignStyle: DesignStyle
+  selectedDesignStyle: DesignStyle,
+  selectedTypography: TypographySet
 ): string {
   const sourceNote = data.existing_website
     ? data.existing_website
@@ -615,7 +657,7 @@ TECHNISCHER STACK
 - zentrale CSS-Variablen für Farben, Abstände und Typografie
 - keine unnötigen Abhängigkeiten
 - keine Analytics-, Tracking- oder Cookie-Skripte
-- keine extern geladenen Schriftarten, sofern sie nicht ausdrücklich vorgegeben wurden
+- nur die unten ausgewählten Google Fonts über next/font/google laden
 - performante und barrierearme Umsetzung
 - direkt startbar und ohne Build-Fehler
 
@@ -635,6 +677,14 @@ Logo-Regeln, Barrierefreiheit und die tatsächlichen Unternehmensinhalte haben b
 einem Konflikt Vorrang. Erfinde keine neue Markenidentität.
 
 ${JSON.stringify(selectedDesignStyle, null, 2)}
+
+VERBINDLICHES TYPOGRAFIE-SET AUS DEM KATALOG
+Verwende exakt die folgenden Schriftfamilien, Schriftschnitte, Fallbacks und
+Implementierungswerte. Lade keine weiteren Schriftfamilien und ersetze die
+Auswahl nicht eigenmächtig. Die Überschriftenschrift ist nur für Überschriften
+und kurze Hervorhebungen vorgesehen; längere Texte verwenden die Body-Schrift.
+
+${JSON.stringify(selectedTypography, null, 2)}
 
 Leere Felder aus Blueprint oder Website-Texten bedeuten: Das entsprechende
 Element soll nicht gerendert werden. Erzeuge niemals vorsorglich eine Eyebrow,
