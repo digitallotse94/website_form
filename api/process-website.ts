@@ -57,6 +57,19 @@ type PaletteStyleApplication = {
   notes: string;
 };
 
+type ImageProfile = {
+  id: string;
+  key: string;
+  name: string;
+  use_for: string[];
+  keywords_en: string[];
+  preferred_subjects: string[];
+  mood: string[];
+  hero_composition: string[];
+  avoid: string[];
+  [key: string]: unknown;
+};
+
 const designCatalog = require("../config/builder/design-catalog.json") as {
   schema_version: string;
   catalog_id: string;
@@ -92,6 +105,19 @@ const paletteRules = require("../config/builder/palette-rules.json") as {
   prohibited: string[];
 };
 
+const imageProfileCatalog = require("../config/builder/image-profile-catalog.json") as {
+  schema_version: string;
+  catalog_id: string;
+  purpose: string;
+  selection_logic: {
+    fallback_profile_id: string;
+    rule: string;
+  };
+  global_rules: JsonRecord;
+  profiles: ImageProfile[];
+  style_affinities: Record<string, string[]>;
+};
+
 const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
   id: style.id,
   name: style.name,
@@ -99,6 +125,15 @@ const DESIGN_STYLE_SUMMARY = designCatalog.styles.map((style) => ({
   summary: style.summary,
   selection_signals: style.selection_signals,
   avoid_when: style.avoid_when
+}));
+
+const IMAGE_PROFILE_SUMMARY = imageProfileCatalog.profiles.map((profile) => ({
+  id: profile.id,
+  name: profile.name,
+  use_for: profile.use_for,
+  preferred_subjects: profile.preferred_subjects,
+  mood: profile.mood,
+  avoid: profile.avoid
 }));
 
 export default async function handler(req: any, res: any) {
@@ -205,6 +240,10 @@ if (!generated.blueprint || !generated.website_copy) {
   const selectedDesignStyle = resolveDesignStyle(generated.blueprint);
   const selectedTypography = resolveTypographySet(selectedDesignStyle.id);
   const selectedPaletteGuidance = resolvePaletteGuidance(selectedDesignStyle.id);
+  const selectedImageProfile = resolveImageProfile(
+    generated.blueprint,
+    selectedDesignStyle.id
+  );
 
   const vibePrompt = buildV0Prompt(
     input,
@@ -212,7 +251,8 @@ if (!generated.blueprint || !generated.website_copy) {
     generated.website_copy,
     selectedDesignStyle,
     selectedTypography,
-    selectedPaletteGuidance
+    selectedPaletteGuidance,
+    selectedImageProfile
   );
 
   return res.status(200).json({
@@ -228,12 +268,16 @@ if (!generated.blueprint || !generated.website_copy) {
       palette_mode: selectedPaletteGuidance.style_application.background_mode,
       palette_brand_coverage:
         selectedPaletteGuidance.style_application.brand_coverage,
+      image_profile_id: selectedImageProfile.id,
+      image_profile_name: selectedImageProfile.name,
       catalog_id: designCatalog.catalog_id,
       catalog_version: designCatalog.schema_version,
       typography_catalog_id: typographyCatalog.catalog_id,
       typography_catalog_version: typographyCatalog.schema_version,
       palette_catalog_id: paletteRules.catalog_id,
-      palette_catalog_version: paletteRules.schema_version
+      palette_catalog_version: paletteRules.schema_version,
+      image_catalog_id: imageProfileCatalog.catalog_id,
+      image_catalog_version: imageProfileCatalog.schema_version
     },
     meta: {
       model: usedModel,
@@ -558,6 +602,18 @@ Katalogregeln:
 Verfügbare Styles:
 ${JSON.stringify(DESIGN_STYLE_SUMMARY, null, 2)}
 
+BILDPROFIL-KATALOG
+Wähle genau ein Bildprofil anhand der realen Tätigkeit, des Angebots und der
+benötigten Motive. Die reine Branchenbezeichnung reicht nicht aus. Berücksichtige
+den gewählten Design-Stil, aber bevorzuge ein fachlich passendes Motivprofil.
+
+Katalogregel:
+- ${imageProfileCatalog.selection_logic.rule}
+- Fallback bei unklarer Datenlage: ${imageProfileCatalog.selection_logic.fallback_profile_id}
+
+Verfügbare Bildprofile:
+${JSON.stringify(IMAGE_PROFILE_SUMMARY, null, 2)}
+
 BLUEPRINT
 Ermittle:
 - Branche und Unternehmenstyp
@@ -573,6 +629,8 @@ Ermittle:
   Unternehmens-Visitenkarte
 - genau eine design_style_id aus dem Design-Stil-Katalog und eine kurze,
   nachvollziehbare design_style_reason
+- genau eine image_profile_id aus dem Bildprofil-Katalog und eine kurze,
+  nachvollziehbare image_profile_reason
 - Markenfarben der bestehenden Website sowie geeignete neutrale Hintergrundfarben
 - ein branchenspezifisches Hero-Bildkonzept mit Fokus auf Materialien, Produkte,
   Werkzeuge oder charakteristische Arbeitsdetails
@@ -661,13 +719,41 @@ function resolvePaletteGuidance(styleId: string): JsonRecord & {
   };
 }
 
+function resolveImageProfile(
+  blueprint: JsonRecord,
+  styleId: string
+): ImageProfile {
+  const strategy =
+    blueprint.strategy && typeof blueprint.strategy === "object"
+      ? (blueprint.strategy as JsonRecord)
+      : {};
+  const requestedId = clean(strategy.image_profile_id).toUpperCase();
+  const fallbackId =
+    imageProfileCatalog.selection_logic.fallback_profile_id || "I01";
+  const styleAffinityIds = imageProfileCatalog.style_affinities[styleId] || [];
+  const selected =
+    imageProfileCatalog.profiles.find((profile) => profile.id === requestedId) ||
+    imageProfileCatalog.profiles.find(
+      (profile) => profile.id === styleAffinityIds[0]
+    ) ||
+    imageProfileCatalog.profiles.find((profile) => profile.id === fallbackId) ||
+    imageProfileCatalog.profiles[0];
+
+  if (!selected) {
+    throw new Error("image_profile_catalog_empty");
+  }
+
+  return selected;
+}
+
 function buildV0Prompt(
   data: BusinessInput,
   blueprint: JsonRecord,
   websiteCopy: JsonRecord,
   selectedDesignStyle: DesignStyle,
   selectedTypography: TypographySet,
-  selectedPaletteGuidance: JsonRecord
+  selectedPaletteGuidance: JsonRecord,
+  selectedImageProfile: ImageProfile
 ): string {
   const sourceNote = data.existing_website
     ? data.existing_website
@@ -747,6 +833,15 @@ Erfinde keine zusätzliche prominente Farbe. Prüfe alle Text-, Button- und
 Fokuskontraste nach den enthaltenen Barrierefreiheitsregeln.
 
 ${JSON.stringify(selectedPaletteGuidance, null, 2)}
+
+VERBINDLICHES BILDPROFIL AUS DEM KATALOG
+Nutze dieses Profil für Hero und Inhaltsbilder. Motive müssen zur realen
+Tätigkeit passen. Beachte besonders die bevorzugten Motive, Bildstimmung,
+Hero-Komposition und Ausschlussmotive. Die englischen Keywords sind die
+Grundlage einer Stockbildsuche, aber kein Auftrag, beliebige Treffer ungeprüft
+zu übernehmen. Eigene geeignete Unternehmensbilder haben weiterhin Vorrang.
+
+${JSON.stringify(selectedImageProfile, null, 2)}
 
 Leere Felder aus Blueprint oder Website-Texten bedeuten: Das entsprechende
 Element soll nicht gerendert werden. Erzeuge niemals vorsorglich eine Eyebrow,
@@ -1048,7 +1143,9 @@ const OUTPUT_SCHEMA = {
             "tone",
             "design_direction",
             "design_style_id",
-            "design_style_reason"
+            "design_style_reason",
+            "image_profile_id",
+            "image_profile_reason"
           ],
           properties: {
             primary_goal: S,
@@ -1060,7 +1157,12 @@ const OUTPUT_SCHEMA = {
               type: "string",
               enum: designCatalog.styles.map((style) => style.id)
             },
-            design_style_reason: S
+            design_style_reason: S,
+            image_profile_id: {
+              type: "string",
+              enum: imageProfileCatalog.profiles.map((profile) => profile.id)
+            },
+            image_profile_reason: S
           }
         },
         services: {
